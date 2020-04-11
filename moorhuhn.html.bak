@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Moorhuhn Texas</title>
+        <style>
+          * {
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+          }
+          html {
+            height: 100%;
+            width: 100%;
+          }
+          body {
+            background-color: lightblue;
+            display: grid;
+            height: 100%;
+            width: 100%;
+          }
+          body {
+            -webkit-touch-callout: none;
+
+            -webkit-user-select: none;
+
+            -moz-user-select: none;
+
+            user-select: none;
+          }
+          canvas {
+            /* align-self: center;
+            justify-self: center; */
+            cursor: url('./assets/graphics/Crosshair2.cur'), url('./assets/graphics/Crosshair2.cur'), auto;
+            cursor: none;
+          }
+        </style>
+
+        <script type="text/javascript" src="./js/lib/lodash.js"></script>
+        <script type="text/javascript" src="./js/helpers/myhelpers.js"></script>
+
+        <script type="text/javascript" src="./js/Landscape1.js"></script>
+        <script type="text/javascript" src="./js/MoorhuhnFlying.js"></script>
+        <script type="text/javascript" src="./js/Crosshair.js"></script>
+        <script type="text/javascript" src="./js/Countdown.js"></script>
+        <script type="text/javascript" src="./js/Score.js"></script>
+        <script type="text/javascript" src="./js/Cactus.js"></script>
+        <script type="text/javascript" src="./js/Ammo.js"></script>
+    </head>
+    <body>
+
+        <canvas id="hra-moorhuhn"></canvas>
+
+
+        <script type="text/javascript">
+
+            // ziskanie contextu a bufferu
+            var context = document.querySelector("canvas").getContext("2d");
+            var buffer  = document.createElement("canvas").getContext("2d"); // zasobnik, najprv vykreslujeme tam, az potom do canvasu
+            console.log(':::: context a buffer mame ::::');
+
+            // zistime vysku sirku podla clienta (prehliadaca)
+            var height = document.documentElement.clientHeight;
+            var width = document.documentElement.clientWidth;
+
+            var moorhuhns = {}; // mooorhuhny na vykreslenie
+            var moorhuhnsSorted = []; // moorhuhny usporiadane podla velkosti na spravne vykreslenie prekryvania
+            var moorhuhnAmountMax = 1; // maximum povolenych moorhuhnov na vykreslenie v dany moment v case, toto sa meni s beziacim casom
+            var moorhuhnMax = 15; // maximum moorhuhnov na vykreslenie - toto je absolutny max, ktory sa neprekroci
+            var moorhuhnK = 60; // do K si budeme ukladat koeficient pre zvysovanie poctu moorhuhnov exponencialne
+            var id_log = 0; // log posledneho id moorhuhna
+            var imagesLoaded = false;
+            var stopAnimations = false; // pouziva sa pri game over // nebude sa pouzivat - kazdy objekt bude mat vlastny stav stopovania movementu a animacie
+
+            var gameLoop_i = 0; // pocitame iteracie v hernom loope
+
+            var pointer = { down:false, x:0, y:0 }; // cursor mysi
+
+            function shoot(x, y) {
+                // ak mame prazdny zasobnik, nerob nic
+                if(ammo.isMagazineEmpty()) { return false; }
+
+                // odober naboj zo zasobnika
+                ammo.updateMagazine(-1);
+
+                // zorad moorhuhnov descending podla velkosti, aby trafeny bol vzdy moorhuhn vykresleny blizsie ak su v zakryte
+                var mDesc = moorhuhnsSorted;
+                mDesc.sort(function(a, b){return b-a});
+
+                // prejdi vsetkych vykreslenych moorhuhnov a zisti ci bolo kliknute na poziciu niektoreho z nich
+                for (i = 0; i < mDesc.length; i++) {
+                    var moorhuhn = moorhuhns[mDesc[i].id];
+                    if(moorhuhn.x <= x && x <= moorhuhn.x + moorhuhn.width && moorhuhn.y <= y && y <= moorhuhn.y + moorhuhn.height) {
+                        if(moorhuhn.moorhuhnHit === true) { return false; } // ak uz moorhuhn zomiera, nerob nic
+                        moorhuhn.moorhuhnShot();
+                        score.updateScore(moorhuhn.points);
+                        return false; // zasiahli sme moorhuhna, ukonci hladanie trafeneho
+                    }
+                };
+            };
+
+            // funkcia na loadnutie obrazka/obrazkov pre jeden objekt
+            function loadImage(obj) {
+                return new Promise((resolve, reject) => {
+                    let img = new Image();
+                    img.addEventListener("load", () => {
+                        obj.img = img;
+                        if (obj.hasOwnProperty('imgDeadSrc')) {
+                            let imgDead = new Image();
+                            imgDead.addEventListener("load", () => {
+                                obj.imgDead = imgDead;
+                                resolve(obj);
+                            });
+                            imgDead.addEventListener("error", (err) => {
+                                reject(err);
+                            });
+                            imgDead.src = obj.imgDeadSrc;
+                        }
+                        resolve(obj);
+                    });
+                    img.addEventListener("error", (err) => {
+                        reject(err);
+                    });
+                    img.src = obj.imgSrc;
+                });
+            }
+
+            // vytvorime po jednom objekte z kazdeho typu pre jednorazove loadnutie obrazkov
+            var landscape1 =  new Landscape1(0, 0);
+
+            var moorhuhnFlyLeft = new MoorhuhnFlying('mfl', -1, context.canvas.width, context.canvas.height, './assets/graphics/Moorhuhn_L.png', './assets/graphics/Moorhuhn_L_zasah.png');
+            // var moorhuhnFlyLeft = new MoorhuhnFlying('mfl', -1, context.canvas.width, context.canvas.height, './assets/graphics/Transparent_PNG/flying/flappy_L.png', './assets/graphics/Transparent_PNG/flying/flappy_L_hit.png');
+
+            var moorhuhnFlyRight = new MoorhuhnFlying('mfr', 1, context.canvas.width, context.canvas.height, './assets/graphics/Moorhuhn_P.png', './assets/graphics/Moorhuhn_P_zasah.png');
+            // var moorhuhnFlyRight = new MoorhuhnFlying('mfr', 1, context.canvas.width, context.canvas.height, './assets/graphics/Transparent_PNG/flying/flappy_R.png', './assets/graphics/Transparent_PNG/flying/flappy_R_hit.png');
+
+            var moorhuhnTypes = [moorhuhnFlyLeft, moorhuhnFlyRight];
+
+            var countdown = new Countdown();
+            countdown.initTime();
+
+            var score = new Score();
+            score.initScore();
+
+            var ammo = new Ammo();
+
+            var crosshair = new Crosshair();
+
+            // zachytavanie pozicie mysi
+            context.canvas.addEventListener('mousemove', function(event) {
+                crosshair.updateMousePosition(event.clientX, event.clientY);
+            });
+
+            // zachytavanie clicku mysi
+            context.canvas.addEventListener('mousedown', function(event) {
+                shoot(event.clientX, event.clientY);
+            });
+
+            // zachytavanie stlacenie medzernika
+            document.addEventListener('keyup', function(event) {
+                if(event.keyCode === 32) {
+                    ammo.reloadMagazine();
+                }
+            });
+
+            // objekty za sebou v liste
+            var objects = [landscape1, moorhuhnFlyLeft, moorhuhnFlyRight, crosshair, countdown, score, ammo];
+
+            // loaded unique objects - objekt vsetkych unikatnych objektov s loadnutymi obrazkami
+            var luo = {};
+
+            // loadnutie obrazkov pre vsetky objekty naraz
+            Promise
+                .all(objects.map(i => loadImage(i)))
+                .then((objects) => {
+                    objects.forEach((obj) => { // pre kazdy objekt
+                        luo[obj.id] = obj;
+                    });
+                    // teraz spustame gameLoop
+                    console.log('--- Spustame Herny Loop ---');
+                    gameLoop();
+                }).catch((err) => {
+                    console.error(err);
+                });
+
+            // tu mame funkcie na vykreslovanie jednotlivych objektov
+            // Pozadie
+            function drawLandscape1() {
+                buffer.drawImage(luo.landscape1.img, 0, 0, luo.landscape1.width, luo.landscape1.height, 0, 0, buffer.canvas.width, buffer.canvas.height);
+            }
+
+            function generateMoorhuhns() {
+                // zvysujeme pocet povolenych moorhuhnov na vykreslenie postupne s ubudajucim casom
+                moorhuhnAmountMax = (moorhuhnAmountMax + 0.1) * (1 + moorhuhnK / 10000);
+                if(moorhuhnAmountMax > moorhuhnMax) { moorhuhnAmountMax = moorhuhnMax; } // mame limit pre maximalny pocet moorhuhnov
+
+                // zistime ci mame pridat na vykreslenie dalsieho moorhuhna
+                if(Math.trunc(moorhuhnAmountMax) - _.size(moorhuhns) >= 1) {
+                    // nahodne vyber typ moorhuhna a vygeneruj noveho ako kopiu
+                    var rm = moorhuhnTypes[Math.floor(Math.random() * moorhuhnTypes.length)]; // rm - random moorhuhn
+                    var luoM = luo[rm.id];
+                    // nove id
+                    id_log += 1; var m_id = id_log;
+                    var newMoorhuhnFlying = new MoorhuhnFlying(m_id, luoM.d, context.canvas.width, context.canvas.height, luoM.imgSrc, luoM.imgDeadSrc, luoM.img, luoM.imgDead); // uz vygenerovane obrazky len posunieme novemu moorhuhnovi
+                    moorhuhns[m_id] = newMoorhuhnFlying;
+                }
+            }
+
+            function deleteMoorhuhns() {
+
+                var toDelete = {};
+
+                for(var id in moorhuhns) {
+                    var moorhuhn = moorhuhns[id];
+                    if(moorhuhn.isDead === true) {
+                        toDelete[id] = id;
+                    }
+                }
+
+                for(var id in toDelete) {
+                    delete moorhuhns[id];
+                }
+
+                return false;
+            }
+
+            // Moorhuhni
+            function drawMoorhuhns() {
+
+                // vymaz vsetkych moorhuhnov co cakaju na vymazanie
+                deleteMoorhuhns();
+
+                // usporiadame moorhuhnov v objekte podla ich velkosti, aby sa vzdy vykreslil mensi morhuhn za vacsim
+                var moorhuhnsV = Object.values(moorhuhns);
+                moorhuhnsSorted = moorhuhnsV.sort( compare ); // 'compare' je callback funkcie ktoru sme definovali uplne hore medzi pomocnymi funkciami
+
+                // po usporiadani ich po jednom vykreslime
+                moorhuhnsSorted.forEach(function (item, index) {
+                    // console.log(item, index);
+                    var moorhuhnS = moorhuhnsSorted[index];
+                    var moorhuhn = moorhuhns[moorhuhnS.id];
+
+                    if(typeof moorhuhn !== 'undefined') {
+                        var res = moorhuhn.updatePosition(); // pohyb moorhuhna
+                        var res2 = moorhuhn.updateAnimation();
+
+                        if(moorhuhn.isDead == false) {
+                            // vykreslenie moorhuhna
+                            buffer.drawImage(moorhuhn.useImg, moorhuhn.spriteX, moorhuhn.spriteY, moorhuhn.spriteWidth, moorhuhn.spriteHeight, moorhuhn.x, moorhuhn.y, moorhuhn.width, moorhuhn.height);
+                        }
+                    }
+                });
+            }
+
+            // Timer
+            function drawCountdown() {
+                // vykresli minuty
+                buffer.drawImage(countdown.img, countdown.min.spriteX, countdown.min.spriteY, countdown.spriteWidth, countdown.spriteHeight, countdown.min.x, countdown.min.y, countdown.width, countdown.height);
+
+                // vykresli sekundy desiatky
+                buffer.drawImage(countdown.img, countdown.secT.spriteX, countdown.secT.spriteY, countdown.spriteWidth, countdown.spriteHeight, countdown.secT.x, countdown.secT.y, countdown.width, countdown.height);
+
+                // vykresli sekundy jednotky
+                buffer.drawImage(countdown.img, countdown.sec.spriteX, countdown.sec.spriteY, countdown.spriteWidth, countdown.spriteHeight, countdown.sec.x, countdown.sec.y, countdown.width, countdown.height);
+            }
+
+            // Score
+            function drawScore() {
+                // vykresli kazdu cifru score od posledneho zprava dolava
+                score.ciphersRev.forEach(function (item, index) {
+                    var cipher = item;
+
+                    var spriteX = 0;
+
+                    var spriteY = item * score.spriteHeight;
+
+                    var x = width - 20 - (index * score.width + score.width);
+
+                    var y = 20;
+
+                    // vykreslujeme
+                    buffer.drawImage(score.img, spriteX, spriteY, score.spriteWidth, score.spriteHeight, x, y, score.width, score.height);
+                });
+            }
+
+            // Ammo
+            function drawAmmo() {
+
+                // mame len jeden sprite, pozicie x a y su 0
+                var spriteX = 0;
+                var spriteY = 0;
+
+                // var y = context.canvas.width - 20 - context.canvas.height;
+                var y = context.canvas.height - 20 - ammo.height;
+
+                // vykresli kazdy naboj v zasobniku
+                for(var i = 1; i <= ammo.magazine; i++) { // for mozeme robit aj odpocitavanim, co je lepsie pre performance
+
+                    var x = width - 20 - (i * ammo.width);
+
+                    if(i > 0) { x += -5 * i; } // 5 // okrem prveho cisla zprava, kazdemu dalsiemu pridaj medzeru // bez medzery to vyzera lepsie
+
+                    buffer.drawImage(ammo.img, spriteX, spriteY, ammo.spriteWidth, ammo.spriteHeight, x, y, ammo.width, ammo.height);
+                }
+            }
+
+            // HUD (Heads-Up Display)
+            function drawHud() {
+                // timer
+                drawCountdown();
+
+                // score
+                drawScore();
+
+                // ammo
+                drawAmmo();
+            }
+
+            // Mieridlo
+            function drawCrosshair() {
+                buffer.drawImage(crosshair.img, crosshair.x, crosshair.y, crosshair.width, crosshair.height);
+            }
+
+            // Game Over overlay
+            function drawGameOver() {
+
+            }
+
+            // zastavime vsetkych moorhuhnov
+            function stopMoorhuhns() {
+                for(var i in moorhuhns) {
+                    var moorhuhn = moorhuhns[i];
+                    moorhuhn.stop();
+                }
+            }
+
+            // Zastavime dianie v leveli
+            function stopLevel() {
+                stopMoorhuhns();
+            }
+
+            // funkcia na odpocitavanie casu
+            function runTimer() {
+                if(countdown.active == true) { return false; } // ak uz bezi, nespusti ho znovu
+                countdown.active = true;
+
+                var timerInterval = window.setInterval( function() {
+                    // kazdu sekundu pregeneruj moorhuhnov na zobrazenie
+                    generateMoorhuhns();
+                    if(countdown.time > 0) { countdown.updateTime(-1); }
+                }, 1000);
+
+                if(countdown.time <= 0) { clearInterval(timerInterval); }
+            }
+
+            // Herny loop
+            function gameLoop() { // tu sa deje vsetko
+
+                // spustime odpocitavanie
+                runTimer();
+
+                // poistka pri developmente - ak dosiahne zadanu iteraciu, herny loop sa zastavi
+                // ak je kod zle navrhnuty, moze pretiect pamatovy zasobnik a zhodime hru / prehliadac
+                gameLoop_i += 1; // pocitame iteracie herneho loopu
+                if(gameLoop_i == 10000) {  // zastavenie loopu na testovanie pocas developmentu
+                    // return false; // po returne sa funkcia ukonci, loop sa zastavi
+                }
+
+                window.requestAnimationFrame(gameLoop); // gameLoop vola sam seba donekonecna
+
+                // v pripade zmeny rozlisenia, sa zmena detekuje v gameLoope a zmeni sa rozmer canvasu
+                height = document.documentElement.clientHeight;
+                width = document.documentElement.clientWidth;
+
+                // tu urcime velkost podla landscape1 aspect ratio
+                height = width / landscape1.aspectRatio;
+
+                // buffer
+                buffer.canvas.height = height;
+                buffer.canvas.width = width;
+
+                // context
+                context.canvas.height = height;
+                context.canvas.width = width;
+
+                // vypnute | zapnute automaticke vyhladzovanie obrazkov
+                buffer.imageSmoothingEnabled = true;
+                context.imageSmoothingEnabled = true;
+
+                // vykresli pozadie
+                drawLandscape1();
+
+                // vykresli moorhuhnov
+                drawMoorhuhns();
+
+                // vykresli HUD
+                drawHud();
+
+                // vykresli Crosshair
+                drawCrosshair();
+
+                if(countdown.time <= 0) { // casomiera skoncila
+
+                    // zastav cele diane v leveli
+                    stopLevel();
+
+                    // vykresli Game Over overlay nad vsetko ostatne
+                    drawGameOver();
+
+                    console.log('--- Cas vyprsal ---');
+                }
+
+                // vykreslujeme buffer do canvasu
+                context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
+            }
+
+        </script>
+
+    </body>
+</html>

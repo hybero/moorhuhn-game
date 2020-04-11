@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+html {
+    height: 100%;
+    width: 100%;
+}
+body {
+    background-color: lightblue;
+    display: grid;
+    height: 100%;
+    width: 100%;
+}
+body {
+    -webkit-touch-callout: none;
+
+    -webkit-user-select: none;
+
+    -moz-user-select: none;
+
+    user-select: none;
+}
+canvas {
+    /* align-self: center;
+    justify-self: center; */
+    cursor: url('./assets/graphics/Crosshair2.cur'), url('./assets/graphics/Crosshair2.cur'), auto;
+    cursor: none;
+}
