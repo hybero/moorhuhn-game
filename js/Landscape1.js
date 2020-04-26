@@ -7,3 +7,11 @@ const Landscape1 = function (x, y) {
     this.width = 1280; this.height = 720;
     this.aspectRatio = 1.777;
 };
+
+Landscape1.prototype = {
+
+    init: function() {
+
+    }
+
+};

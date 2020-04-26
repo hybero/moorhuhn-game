@@ -4,7 +4,38 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <title>Moorhuhn Texas</title>
-        <link rel="stylesheet" href="./css/styles.css">
+        <style>
+          * {
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+          }
+          html {
+            height: 100%;
+            width: 100%;
+          }
+          body {
+            background-color: lightblue;
+            display: grid;
+            height: 100%;
+            width: 100%;
+          }
+          body {
+            -webkit-touch-callout: none;
+
+            -webkit-user-select: none;
+
+            -moz-user-select: none;
+
+            user-select: none;
+          }
+          canvas {
+            /* align-self: center;
+            justify-self: center; */
+            cursor: url('./assets/graphics/Crosshair2.cur'), url('./assets/graphics/Crosshair2.cur'), auto;
+            cursor: none;
+          }
+        </style>
 
         <script type="text/javascript" src="./js/lib/lodash.js"></script>
         <script type="text/javascript" src="./js/helpers/myhelpers.js"></script>
@@ -16,9 +47,6 @@
         <script type="text/javascript" src="./js/Score.js"></script>
         <script type="text/javascript" src="./js/Cactus.js"></script>
         <script type="text/javascript" src="./js/Ammo.js"></script>
-        <script type="text/javascript" src="./js/Menu.js"></script>
-        <script type="text/javascript" src="./js/Level1.js"></script>
-        <script type="text/javascript" src="./js/Game.js"></script>
     </head>
     <body>
 
@@ -48,6 +76,20 @@
             var gameLoop_i = 0; // pocitame iteracie v hernom loope
 
             var pointer = { down:false, x:0, y:0 }; // cursor mysi
+
+            var level1_stopped = false;
+            var menu_stopped = false;
+
+            const GAMESTATE = {
+                PAUSED: 1,
+                RUNNING: 2,
+                MENU: 3,
+                ABOUT: 4,
+                SETTINGS: 5,
+                GAME_OVER: 6,
+            };
+
+            var gameState = GAMESTATE.MENU;
 
             function shoot(x, y) {
                 // ak mame prazdny zasobnik, nerob nic
@@ -109,13 +151,13 @@
 
             var moorhuhnTypes = [moorhuhnFlyLeft, moorhuhnFlyRight];
 
-            var countdown = new Countdown();
+            var countdown = new Countdown(buffer, context);
             countdown.initTime();
 
-            var score = new Score();
+            var score = new Score(buffer, context);
             score.initScore();
 
-            var ammo = new Ammo();
+            var ammo = new Ammo(buffer, context);
 
             var crosshair = new Crosshair();
 
@@ -150,8 +192,10 @@
                         luo[obj.id] = obj;
                     });
                     // teraz spustame gameLoop
-                    console.log('--- Spustame Herny Loop ---');
-                    gameLoop();
+                    console.log('--- Spustame Heru ---');
+                    // level1Loop();
+                    // menuLoop();
+                    runGame();
                 }).catch((err) => {
                     console.error(err);
                 });
@@ -327,7 +371,12 @@
             }
 
             // Herny loop
-            function gameLoop() { // tu sa deje vsetko
+            function level1Loop() { // tu sa deje vsetko
+
+                // if(level1_stopped == true) {
+                //     level1_stopped = false;
+                //     return false;
+                // }
 
                 // spustime odpocitavanie
                 runTimer();
@@ -338,8 +387,6 @@
                 if(gameLoop_i == 10000) {  // zastavenie loopu na testovanie pocas developmentu
                     // return false; // po returne sa funkcia ukonci, loop sa zastavi
                 }
-
-                window.requestAnimationFrame(gameLoop); // gameLoop vola sam seba donekonecna
 
                 // v pripade zmeny rozlisenia, sa zmena detekuje v gameLoope a zmeni sa rozmer canvasu
                 height = document.documentElement.clientHeight;
@@ -384,8 +431,57 @@
                 }
 
                 // vykreslujeme buffer do canvasu
-                context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
+                // context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
+
+                // window.requestAnimationFrame(level1Loop); // gameLoop vola sam seba donekonecna
             }
+
+            function menuLoop() {
+
+
+                buffer.drawImage(crosshair.img, crosshair.x, crosshair.y, crosshair.width, crosshair.height);
+            }
+
+            function pauseGame() {
+
+            }
+
+            function clear() {
+                buffer.clearRect(0, 0, width, height);
+                context.clearRect(0, 0, width, height);
+
+                return false;
+            }
+
+            function runGame() {
+                if(gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) {
+                    menuLoop();
+                }
+
+                if(gameState == GAMESTATE.ABOUT) {
+                    aboutLoop();
+                }
+
+                if(gameState == GAMESTATE.SETTINGS) {
+                    settingsLoop();
+                }
+
+                if(gameState == GAMESTATE.RUNNING) {
+                    level1Loop();
+                }
+
+                if(gameState == GAMESTATE.GAME_OVER) {
+                    gameOverLoop();
+                }
+
+                clear();
+
+                context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
+
+                window.requestAnimationFrame(runGame);
+            }
+
+            runGame();
 
         </script>
 

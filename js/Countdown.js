@@ -1,18 +1,20 @@
 // Countdown
-const Countdown = function () {
+const Countdown = function (buffer, context) {
+    this.context = context;
+    this.buffer = buffer;
     this.id = 'countdown';
     this.x = null, this.y = null;
     this.img = null;
     this.imgSrc = './assets/graphics/numbers/numbers_vertical.png';
-    this.width = context.canvas.width / 10; this.height = context.canvas.height / 4;
+    this.width = this.context.canvas.width / 10; this.height = this.context.canvas.height / 4;
     this.spriteWidth = 64; this.spriteHeight = 82;
     this.timeConverted = { minutes: 0, seconds: 0 };
     this.timeStart = 180;
     this.time = this.timeStart;
     this.active = false;
-    this.min = { val: 0, x: context.canvas.width / 16, y: 20, spriteX: 0, spriteY: 0 }; // pozicia cifry na canvase, pozicia spritu danej cifry
-    this.secT = { val: 0, x: context.canvas.width / 4, y: 20, spriteX: 0, spriteY: 0 };
-    this.sec = { val: 0, x: context.canvas.width / 2.8, y: 20, spriteX: 0, spriteY: 0 };
+    this.min = { val: 0, x: this.context.canvas.width / 16, y: 20, spriteX: 0, spriteY: 0 }; // pozicia cifry na canvase, pozicia spritu danej cifry
+    this.secT = { val: 0, x: this.context.canvas.width / 4, y: 20, spriteX: 0, spriteY: 0 };
+    this.sec = { val: 0, x: this.context.canvas.width / 2.8, y: 20, spriteX: 0, spriteY: 0 };
 };
 Countdown.prototype = {
 

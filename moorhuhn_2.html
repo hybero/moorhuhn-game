@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Moorhuhn Texas</title>
+        <link rel="stylesheet" href="./css/styles.css">
+
+        <script type="text/javascript" src="./js/lib/lodash.js"></script>
+        <script type="text/javascript" src="./js/helpers/myhelpers.js"></script>
+        <script type="text/javascript" src="./js/helpers/ImagesLoader.js"></script>
+
+        <script type="text/javascript" src="./js/Landscape1.js"></script>
+        <script type="text/javascript" src="./js/MoorhuhnFlying.js"></script>
+        <script type="text/javascript" src="./js/Crosshair.js"></script>
+        <script type="text/javascript" src="./js/Countdown.js"></script>
+        <script type="text/javascript" src="./js/Score.js"></script>
+        <script type="text/javascript" src="./js/Cactus.js"></script>
+        <script type="text/javascript" src="./js/Ammo.js"></script>
+        <script type="text/javascript" src="./js/Level1.js"></script>
+        <script type="text/javascript" src="./js/Menu.js"></script>
+        <script type="text/javascript" src="./js/Game.js"></script>
+    </head>
+    <body>
+
+        <canvas id="hra-moorhuhn"></canvas>
+
+        <script type="text/javascript">
+            window.onload = function() {
+                var game = new Game();
+                game.start();
+            };
+        </script>
+
+    </body>
+</html>
