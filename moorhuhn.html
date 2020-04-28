@@ -4,38 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <title>Moorhuhn Texas</title>
-        <style>
-          * {
-            margin: 0;
-            overflow: hidden;
-            padding: 0;
-          }
-          html {
-            height: 100%;
-            width: 100%;
-          }
-          body {
-            background-color: lightblue;
-            display: grid;
-            height: 100%;
-            width: 100%;
-          }
-          body {
-            -webkit-touch-callout: none;
-
-            -webkit-user-select: none;
-
-            -moz-user-select: none;
-
-            user-select: none;
-          }
-          canvas {
-            /* align-self: center;
-            justify-self: center; */
-            cursor: url('./assets/graphics/Crosshair2.cur'), url('./assets/graphics/Crosshair2.cur'), auto;
-            cursor: none;
-          }
-        </style>
+        <link rel="stylesheet" href="./css/styles.css">
 
         <script type="text/javascript" src="./js/lib/lodash.js"></script>
         <script type="text/javascript" src="./js/helpers/myhelpers.js"></script>
@@ -90,6 +59,7 @@
             };
 
             var gameState = GAMESTATE.MENU;
+            var gameState = GAMESTATE.RUNNING;
 
             function shoot(x, y) {
                 // ak mame prazdny zasobnik, nerob nic
@@ -192,9 +162,7 @@
                         luo[obj.id] = obj;
                     });
                     // teraz spustame gameLoop
-                    console.log('--- Spustame Heru ---');
-                    // level1Loop();
-                    // menuLoop();
+                    console.log('--- Spustame Hru ---');
                     runGame();
                 }).catch((err) => {
                     console.error(err);
@@ -373,11 +341,6 @@
             // Herny loop
             function level1Loop() { // tu sa deje vsetko
 
-                // if(level1_stopped == true) {
-                //     level1_stopped = false;
-                //     return false;
-                // }
-
                 // spustime odpocitavanie
                 runTimer();
 
@@ -430,15 +393,11 @@
                     console.log('--- Cas vyprsal ---');
                 }
 
-                // vykreslujeme buffer do canvasu
-                // context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
-
-                // window.requestAnimationFrame(level1Loop); // gameLoop vola sam seba donekonecna
             }
 
             function menuLoop() {
-                
 
+                //
                 buffer.drawImage(crosshair.img, crosshair.x, crosshair.y, crosshair.width, crosshair.height);
             }
 
@@ -454,6 +413,8 @@
             }
 
             function runGame() {
+                clear();
+
                 if(gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) {
                     menuLoop();
                 }
@@ -474,14 +435,10 @@
                     gameOverLoop();
                 }
 
-                clear();
-
                 context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
 
                 window.requestAnimationFrame(runGame);
             }
-
-            runGame();
 
         </script>
 

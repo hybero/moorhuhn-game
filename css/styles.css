@@ -1,3 +1,13 @@
+@font-face {
+    font-family: 'Gomarice';
+    src: url('/fonts/gomarice_game_music_love.ttf');
+}
+
+@font-face {
+    font-family: 'Zig';
+    src: url('/fonts/zig.ttf');
+}
+
 * {
     margin: 0;
     overflow: hidden;
