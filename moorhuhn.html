@@ -16,6 +16,8 @@
         <script type="text/javascript" src="./js/Score.js"></script>
         <script type="text/javascript" src="./js/Cactus.js"></script>
         <script type="text/javascript" src="./js/Ammo.js"></script>
+        <!-- <script type="text/javascript" src="./js/SoundPool.js"></script> -->
+        <script type="text/javascript" src="./js/SoundPool_2.js"></script>
     </head>
     <body>
 
@@ -23,6 +25,9 @@
 
 
         <script type="text/javascript">
+
+            var soundPool = new SoundPool();
+            soundPool.init();
 
             // ziskanie contextu a bufferu
             var context = document.querySelector("canvas").getContext("2d");
@@ -46,42 +51,59 @@
 
             var pointer = { down:false, x:0, y:0 }; // cursor mysi
 
-            var level1_stopped = false;
-            var menu_stopped = false;
+            // var level1_stopped = false;
+            // var menu_stopped = false;
 
             const GAMESTATE = {
-                PAUSED: 1,
-                RUNNING: 2,
-                MENU: 3,
-                ABOUT: 4,
-                SETTINGS: 5,
-                GAME_OVER: 6,
+                INTRO: 0,
+                MENU: 1,
+                PAUSED: 2,
+                RUNNING: 3,
+                STOPPED: 4
             };
 
-            var gameState = GAMESTATE.MENU;
-            var gameState = GAMESTATE.RUNNING;
+            var gameState = GAMESTATE.INTRO;
 
-            function shoot(x, y) {
-                // ak mame prazdny zasobnik, nerob nic
-                if(ammo.isMagazineEmpty()) { return false; }
+            const GAMEPAGE = {
+                INTRO: 0,
+                MENU: 1,
+                ABOUT: 2,
+                SETTINGS: 3,
+                LEVEL_1: 4,
+                GAME_OVER: 5
+            };
 
-                // odober naboj zo zasobnika
-                ammo.updateMagazine(-1);
+            var gamePage = GAMEPAGE.INTRO;
 
-                // zorad moorhuhnov descending podla velkosti, aby trafeny bol vzdy moorhuhn vykresleny blizsie ak su v zakryte
-                var mDesc = moorhuhnsSorted;
-                mDesc.sort(function(a, b){return b-a});
-
-                // prejdi vsetkych vykreslenych moorhuhnov a zisti ci bolo kliknute na poziciu niektoreho z nich
-                for (i = 0; i < mDesc.length; i++) {
-                    var moorhuhn = moorhuhns[mDesc[i].id];
-                    if(moorhuhn.x <= x && x <= moorhuhn.x + moorhuhn.width && moorhuhn.y <= y && y <= moorhuhn.y + moorhuhn.height) {
-                        if(moorhuhn.moorhuhnHit === true) { return false; } // ak uz moorhuhn zomiera, nerob nic
-                        moorhuhn.moorhuhnShot();
-                        score.updateScore(moorhuhn.points);
-                        return false; // zasiahli sme moorhuhna, ukonci hladanie trafeneho
+            var buttons = {
+                menu: {
+                    start: {
+                        x: width/2 - 60,
+                        y: 150,
+                        w: 120,
+                        h: 35
+                    },
+                    about: {
+                        x: width/2 - 60,
+                        y: 230,
+                        w: 120,
+                        h: 35
+                    },
+                    settings: {
+                        x: width/2 - 93,
+                        y: 310,
+                        w: 186,
+                        h: 35
                     }
-                };
+                },
+                game_over: {
+                    continue: {
+                        x: width/2 - 96,
+                        y: 310,
+                        w: 192,
+                        h: 35
+                    }
+                }
             };
 
             // funkcia na loadnutie obrazka/obrazkov pre jeden objekt
@@ -138,13 +160,52 @@
 
             // zachytavanie clicku mysi
             context.canvas.addEventListener('mousedown', function(event) {
-                shoot(event.clientX, event.clientY);
+                switch (gameState) {
+                    case GAMESTATE.INTRO:
+                        gameState = GAMESTATE.MENU;
+                        gamePage = GAMEPAGE.MENU;
+                        break;
+                    case GAMESTATE.STOPPED:
+                        continueClick(event.clientX, event.clientY);
+                        break;
+                    case GAMESTATE.MENU:
+                        menuOnClick(event.clientX, event.clientY);
+                        break;
+                    case GAMESTATE.PAUSED:
+                        menuOnClick(event.clientX, event.clientY);
+                        break;
+                    case GAMESTATE.RUNNING:
+                        shoot(event.clientX, event.clientY);
+                        break;
+                    default:
+                        break;
+                }
             });
 
             // zachytavanie stlacenie medzernika
             document.addEventListener('keyup', function(event) {
-                if(event.keyCode === 32) {
+                if(gameState == GAMESTATE.INTRO) {
+                    gameState = GAMESTATE.MENU;
+                    gamePage = GAMEPAGE.MENU;
+                }
+
+                // stlacenim medzernika sa zasobnik prebije
+                if(event.keyCode === 32 && gameState == GAMESTATE.RUNNING) {
                     ammo.reloadMagazine();
+                    soundPool.playReload();
+                }
+
+                // stlacenim ESC alebo P sa beziaca hra pauzne
+                if(event.keyCode === 27 || event.keyCode === 80) {
+                    if(gamePage === GAMEPAGE.GAME_OVER) {
+                        gamePage = GAMEPAGE.MENU;
+                        gameState = GAMESTATE.MENU;
+                    }
+                    if(gameState === GAMESTATE.RUNNING) {
+                        pauseGame();
+                    } else if(gameState === GAMESTATE.PAUSED) {
+                        resumeGame();
+                    }
                 }
             });
 
@@ -175,6 +236,7 @@
             }
 
             function generateMoorhuhns() {
+                if(gameState === GAMESTATE.PAUSED) { return false; }
                 // zvysujeme pocet povolenych moorhuhnov na vykreslenie postupne s ubudajucim casom
                 moorhuhnAmountMax = (moorhuhnAmountMax + 0.1) * (1 + moorhuhnK / 10000);
                 if(moorhuhnAmountMax > moorhuhnMax) { moorhuhnAmountMax = moorhuhnMax; } // mame limit pre maximalny pocet moorhuhnov
@@ -200,6 +262,22 @@
                     if(moorhuhn.isDead === true) {
                         toDelete[id] = id;
                     }
+                }
+
+                for(var id in toDelete) {
+                    delete moorhuhns[id];
+                }
+
+                return false;
+            }
+
+            function deleteAllMoorhuhns() {
+
+                var toDelete = {};
+
+                for(var id in moorhuhns) {
+                    var moorhuhn = moorhuhns[id];
+                    toDelete[id] = id;
                 }
 
                 for(var id in toDelete) {
@@ -306,23 +384,54 @@
                 buffer.drawImage(crosshair.img, crosshair.x, crosshair.y, crosshair.width, crosshair.height);
             }
 
-            // Game Over overlay
-            function drawGameOver() {
-
-            }
-
             // zastavime vsetkych moorhuhnov
-            function stopMoorhuhns() {
+            function pauseMoorhuhns() {
                 for(var i in moorhuhns) {
                     var moorhuhn = moorhuhns[i];
-                    moorhuhn.stop();
+                    moorhuhn.pause();
+                }
+            }
+
+            function resumeMoorhuhns() {
+                for(var i in moorhuhns) {
+                    var moorhuhn = moorhuhns[i];
+                    moorhuhn.resume();
                 }
             }
 
             // Zastavime dianie v leveli
             function stopLevel() {
-                stopMoorhuhns();
+                pauseMoorhuhns();
             }
+
+            function shoot(x, y) {
+                // ak mame prazdny zasobnik, nerob nic
+                if(ammo.isMagazineEmpty()) { return false; }
+
+                soundPool.playShoot();
+
+                // ak je stopnuty timer, tak nerob nic
+                if(countdown.active === false) { return false; }
+
+                // odober naboj zo zasobnika
+                ammo.updateMagazine(-1);
+
+                // zorad moorhuhnov descending podla velkosti, aby trafeny bol vzdy moorhuhn vykresleny blizsie ak su v zakryte
+                var mDesc = moorhuhnsSorted;
+                mDesc.sort(function(a, b){return b-a});
+
+                // prejdi vsetkych vykreslenych moorhuhnov a zisti ci bolo kliknute na poziciu niektoreho z nich
+                for (i = 0; i < mDesc.length; i++) {
+                    var moorhuhn = moorhuhns[mDesc[i].id];
+                    if(typeof moorhuhn === 'undefined') { return false; }
+                    if(moorhuhn.x <= x && x <= moorhuhn.x + moorhuhn.width && moorhuhn.y <= y && y <= moorhuhn.y + moorhuhn.height) {
+                        if(moorhuhn.moorhuhnHit === true) { return false; } // ak uz moorhuhn zomiera, nerob nic
+                        moorhuhn.moorhuhnShot();
+                        score.updateScore(moorhuhn.points);
+                        return false; // zasiahli sme moorhuhna, ukonci hladanie trafeneho
+                    }
+                };
+            };
 
             // funkcia na odpocitavanie casu
             function runTimer() {
@@ -331,18 +440,221 @@
 
                 var timerInterval = window.setInterval( function() {
                     // kazdu sekundu pregeneruj moorhuhnov na zobrazenie
-                    generateMoorhuhns();
-                    if(countdown.time > 0) { countdown.updateTime(-1); }
+                    if(gameState === GAMESTATE.RUNNING) {
+                        generateMoorhuhns();
+                        if(countdown.time > 0) { countdown.updateTime(-1); }
+                    }
                 }, 1000);
 
                 if(countdown.time <= 0) { clearInterval(timerInterval); }
             }
 
             // Herny loop
-            function level1Loop() { // tu sa deje vsetko
+            function level1() { // tu sa deje vsetko
+                soundPool.playLevel_1();
 
                 // spustime odpocitavanie
                 runTimer();
+
+                // vykresli pozadie
+                drawLandscape1();
+
+                // vykresli moorhuhnov
+                drawMoorhuhns();
+
+                // vykresli HUD
+                drawHud();
+
+                // vykresli Crosshair
+                // drawCrosshair();
+
+                if(countdown.time <= 0) { // casomiera skoncila
+
+                    gameOver();
+
+                    console.log('--- Cas vyprsal ---');
+                }
+
+            }
+
+            function intro() {
+                drawLandscape1();
+
+                drawGreyOverlay();
+
+                pressAnyKeyText();
+            }
+
+            function pressAnyKeyText() {
+                buffer.font = "50px Gomarice";
+                buffer.fillStyle = '#FFE336';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+                buffer.fillText('Press Any Key', width/2, 150);
+
+                return false;
+            }
+
+            function gameOver() {
+                soundPool.playGameOver();
+
+                gamePage = GAMEPAGE.GAME_OVER;
+                gameState = GAMESTATE.STOPPED;
+
+                // zastav cele diane v leveli
+                stopLevel();
+
+                // vykresli Game Over overlay
+                drawGameOver();
+            }
+
+            function drawGameOver() {
+                drawGreyOverlay();
+
+                headingText();
+
+                gameOverText();
+
+                scoreText();
+
+                continueText();
+            }
+
+            function continueClick(clientX, clientY) {
+                var button = buttons.game_over.continue;
+                if(clientX >= button.x && clientX <= button.x + button.w && clientY >= button.y && clientY <= button.y + button.h) {
+                    gameState = GAMESTATE.MENU;
+                    gamePage = GAMEPAGE.MENU;
+                }
+            }
+
+            function menuOnClick(clientX, clientY) {
+                soundPool.playShoot();
+                for(var buttonName in buttons.menu) {
+                    var button = buttons.menu[buttonName];
+                    if(clientX >= button.x && clientX <= button.x + button.w && clientY >= button.y && clientY <= button.y + button.h) {
+                        switch (buttonName) {
+                            case 'start':
+                                resetLevel();
+                                gameState = GAMESTATE.RUNNING;
+                                break;
+                            case 'about':
+                                gameState = GAMESTATE.ABOUT;
+                                break;
+                            case 'settings':
+                                gameState = GAMESTATE.SETTINGS;
+                                break;
+                            default:
+                                break;
+                        }
+                        return false;
+                    }
+                }
+            }
+
+            function resetLevel() {
+                countdown.initTime();
+                score.initScore();
+                ammo.magazine = 5;
+                deleteAllMoorhuhns();
+                moorhuns = {};
+                moorhuhnsSorted = [];
+                moorhuhnAmountMax = 1;
+                moorhuhnK = 60;
+                id_log = 0;
+            }
+
+            function headingText() {
+                // Nadpis
+                buffer.font = "50px Gomarice";
+                buffer.fillStyle = '#FFA936';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+                buffer.fillText('Moorhuhn Texas', width/2, 50);
+
+                return false;
+            }
+
+            function drawGreyOverlay() {
+                // grey overlay
+                buffer.fillStyle = "rgba(32, 45, 21, 0.3)";
+                buffer.fillRect(0, 0, width, height);
+
+                return false;
+            }
+
+            function gameOverText() {
+                buffer.font = "50px Gomarice";
+                buffer.fillStyle = '#1348BA';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+                buffer.fillText('Game Over', width/2, 150);
+
+                return false;
+            }
+
+            function scoreText() {
+                buffer.font = "40px Gomarice";
+                buffer.fillStyle = '#39D631';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+                buffer.fillText('Score: ' + score.points, width/2, 230);
+
+                return false;
+            }
+
+            function continueText() {
+                buffer.font = "40px Gomarice";
+                buffer.fillStyle = '#FFE336';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+                buffer.fillText('Continue', width/2, buttons.game_over.continue.y);
+
+                return false;
+            }
+
+            function menu() {
+                if(gameState === GAMESTATE.MENU) {
+                    drawLandscape1();
+                    soundPool.playMenu();
+                }
+
+                drawGreyOverlay();
+
+                headingText();
+
+                // Buttony
+                buffer.font = "40px Gomarice";
+                buffer.fillStyle = '#FFE336';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+
+                buffer.fillText('Start', width/2, 150);
+
+                buffer.fillText('About', width/2, 230);
+
+                buffer.fillText('Settings', width/2, 310);
+            }
+
+            function pauseGame() {
+                gameState = GAMESTATE.PAUSED;
+                pauseMoorhuhns();
+            }
+
+            function resumeGame() {
+                gameState = GAMESTATE.RUNNING;
+                resumeMoorhuhns();
+            }
+
+            function clear() {
+                buffer.clearRect(0, 0, width, height);
+                context.clearRect(0, 0, width, height);
+
+                return false;
+            }
+
+            function runGame() {
+                clear();
 
                 // poistka pri developmente - ak dosiahne zadanu iteraciu, herny loop sa zastavi
                 // ak je kod zle navrhnuty, moze pretiect pamatovy zasobnik a zhodime hru / prehliadac
@@ -370,70 +682,31 @@
                 buffer.imageSmoothingEnabled = true;
                 context.imageSmoothingEnabled = true;
 
-                // vykresli pozadie
-                drawLandscape1();
-
-                // vykresli moorhuhnov
-                drawMoorhuhns();
-
-                // vykresli HUD
-                drawHud();
-
-                // vykresli Crosshair
-                drawCrosshair();
-
-                if(countdown.time <= 0) { // casomiera skoncila
-
-                    // zastav cele diane v leveli
-                    stopLevel();
-
-                    // vykresli Game Over overlay nad vsetko ostatne
-                    drawGameOver();
-
-                    console.log('--- Cas vyprsal ---');
+                if(gamePage == GAMEPAGE.INTRO) {
+                    intro();
                 }
 
-            }
+                if(gamePage == GAMEPAGE.ABOUT) {
+                    about();
+                }
 
-            function menuLoop() {
+                if(gamePage == GAMEPAGE.SETTINGS) {
+                    settings();
+                }
 
-                //
-                buffer.drawImage(crosshair.img, crosshair.x, crosshair.y, crosshair.width, crosshair.height);
-            }
-
-            function pauseGame() {
-
-            }
-
-            function clear() {
-                buffer.clearRect(0, 0, width, height);
-                context.clearRect(0, 0, width, height);
-
-                return false;
-            }
-
-            function runGame() {
-                clear();
+                if(gameState == GAMESTATE.RUNNING || gameState == GAMESTATE.PAUSED || gamePage == GAMEPAGE.GAME_OVER) {
+                    level1();
+                }
 
                 if(gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) {
-                    menuLoop();
+                    menu();
                 }
 
-                if(gameState == GAMESTATE.ABOUT) {
-                    aboutLoop();
+                if(gamePage == GAMEPAGE.GAME_OVER) {
+                    gameOver();
                 }
 
-                if(gameState == GAMESTATE.SETTINGS) {
-                    settingsLoop();
-                }
-
-                if(gameState == GAMESTATE.RUNNING) {
-                    level1Loop();
-                }
-
-                if(gameState == GAMESTATE.GAME_OVER) {
-                    gameOverLoop();
-                }
+                drawCrosshair();
 
                 context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
 

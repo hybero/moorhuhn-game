@@ -30,6 +30,7 @@ const MoorhuhnFlying = function (id, d, ccw, cch, imgSrc, imgDeadSrc, img, imgDe
     this.animationSpeed = this.flyingAnimationSpeed;
     this.animationK = 0;
     this.useAnimation = 'flying'; // flying | dying
+    this.animationActive = true;
     this.isDead = false;
     this.speedK = 0.02; // 0.02
     this.minSpeed = 20;
@@ -71,13 +72,14 @@ MoorhuhnFlying.prototype = {
             delete moorhuhns[this.id];
         }
 
-
         this.updateSpeed();
 
         return false;
     },
 
     updateAnimation: function() {
+
+        if(this.animationActive == false) { return false; }
 
         // tu sa pocita rychlost vykreslovania.. sprite sa meni podla rychlost animacie a koeficientu rychlosti animacie
         this.animationK += 1;
@@ -124,10 +126,18 @@ MoorhuhnFlying.prototype = {
         return false;
     },
 
-    stop: function() {
+    pause: function() {
 
         this.movingActive = false;
         this.animationActive = false;
+
+        return false;
+    },
+
+    resume: function() {
+
+        this.movingActive = true;
+        this.animationActive = true;
 
         return false;
     },

@@ -29,6 +29,7 @@ Score.prototype = {
     },
 
     initScore: function() {
+        this.points = 0;
         this.updateScore(0);
     }
 

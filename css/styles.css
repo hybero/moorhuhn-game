@@ -1,11 +1,11 @@
 @font-face {
     font-family: 'Gomarice';
-    src: url('/fonts/gomarice_game_music_love.ttf');
+    src: url('../fonts/gomarice_game_music_love.ttf');
 }
 
 @font-face {
     font-family: 'Zig';
-    src: url('/fonts/zig.ttf');
+    src: url('../fonts/zig.ttf');
 }
 
 * {
@@ -18,7 +18,7 @@ html {
     width: 100%;
 }
 body {
-    background-color: lightblue;
+    background-color: lightgray;
     display: grid;
     height: 100%;
     width: 100%;
@@ -37,4 +37,5 @@ canvas {
     justify-self: center; */
     cursor: url('./assets/graphics/Crosshair2.cur'), url('./assets/graphics/Crosshair2.cur'), auto;
     cursor: none;
+    background-color: lightblue;
 }
