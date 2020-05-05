@@ -16,7 +16,6 @@
         <script type="text/javascript" src="./js/Score.js"></script>
         <script type="text/javascript" src="./js/Cactus.js"></script>
         <script type="text/javascript" src="./js/Ammo.js"></script>
-        <!-- <script type="text/javascript" src="./js/SoundPool.js"></script> -->
         <script type="text/javascript" src="./js/SoundPool_2.js"></script>
     </head>
     <body>
@@ -50,9 +49,6 @@
             var gameLoop_i = 0; // pocitame iteracie v hernom loope
 
             var pointer = { down:false, x:0, y:0 }; // cursor mysi
-
-            // var level1_stopped = false;
-            // var menu_stopped = false;
 
             const GAMESTATE = {
                 INTRO: 0,
@@ -153,6 +149,9 @@
 
             var crosshair = new Crosshair();
 
+            // disablnutie right-cliku na canvase
+            context.canvas.addEventListener('contextmenu', event => event.preventDefault());
+
             // zachytavanie pozicie mysi
             context.canvas.addEventListener('mousemove', function(event) {
                 crosshair.updateMousePosition(event.clientX, event.clientY);
@@ -223,7 +222,7 @@
                         luo[obj.id] = obj;
                     });
                     // teraz spustame gameLoop
-                    console.log('--- Spustame Hru ---');
+                    // console.log('--- Spustame Hru ---');
                     runGame();
                 }).catch((err) => {
                     console.error(err);
@@ -254,7 +253,6 @@
             }
 
             function deleteMoorhuhns() {
-
                 var toDelete = {};
 
                 for(var id in moorhuhns) {
@@ -272,7 +270,6 @@
             }
 
             function deleteAllMoorhuhns() {
-
                 var toDelete = {};
 
                 for(var id in moorhuhns) {
@@ -289,7 +286,6 @@
 
             // Moorhuhni
             function drawMoorhuhns() {
-
                 // vymaz vsetkych moorhuhnov co cakaju na vymazanie
                 deleteMoorhuhns();
 
@@ -348,7 +344,6 @@
 
             // Ammo
             function drawAmmo() {
-
                 // mame len jeden sprite, pozicie x a y su 0
                 var spriteX = 0;
                 var spriteY = 0;
@@ -465,16 +460,9 @@
                 // vykresli HUD
                 drawHud();
 
-                // vykresli Crosshair
-                // drawCrosshair();
-
                 if(countdown.time <= 0) { // casomiera skoncila
-
                     gameOver();
-
-                    console.log('--- Cas vyprsal ---');
                 }
-
             }
 
             function intro() {
@@ -539,10 +527,10 @@
                                 gameState = GAMESTATE.RUNNING;
                                 break;
                             case 'about':
-                                gameState = GAMESTATE.ABOUT;
+                                gamePage = GAMEPAGE.ABOUT;
                                 break;
                             case 'settings':
-                                gameState = GAMESTATE.SETTINGS;
+                                gamePage = GAMEPAGE.SETTINGS;
                                 break;
                             default:
                                 break;
@@ -562,6 +550,7 @@
                 moorhuhnAmountMax = 1;
                 moorhuhnK = 60;
                 id_log = 0;
+                soundPool.sounds.game_over.played = false;
             }
 
             function headingText() {
@@ -585,7 +574,7 @@
 
             function gameOverText() {
                 buffer.font = "50px Gomarice";
-                buffer.fillStyle = '#1348BA';
+                buffer.fillStyle = '#D95044';
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
                 buffer.fillText('Game Over', width/2, 150);
@@ -653,6 +642,31 @@
                 return false;
             }
 
+            function about() {
+
+            }
+
+            function settings() {
+                if(gameState === GAMESTATE.MENU) {
+                    drawLandscape1();
+                    // soundPool.playMenu();
+                }
+
+                drawGreyOverlay();
+
+                headingText();
+
+                // Buttony
+                buffer.font = "40px Gomarice";
+                buffer.fillStyle = '#FFE336';
+                buffer.textBaseline = 'top';
+                buffer.textAlign = 'center';
+
+                buffer.fillText('Sound', width/2, 150);
+
+                buffer.fillText('Fullscreen', width/2, 230);
+            }
+
             function runGame() {
                 clear();
 
@@ -698,7 +712,7 @@
                     level1();
                 }
 
-                if(gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) {
+                if( (gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) && gamePage == GAMEPAGE.MENU) {
                     menu();
                 }
 

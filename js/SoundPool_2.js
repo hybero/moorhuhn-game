@@ -26,15 +26,15 @@ const SoundPool = function () {
         game_over: {
             src: './assets/sounds/Game_over.mp3',
             loop: false,
-            // volume: 5.5,
+            volume: 0.5,
             played: false
         }
     };
 };
-var tmp = false;
 SoundPool.prototype = {
 
     init: function() {
+        var self = this;
         for(var soundName in this.sounds) {
             var sound = this.sounds[soundName];
             this.sounds[soundName].snd = new Audio(sound.src);
@@ -45,6 +45,13 @@ SoundPool.prototype = {
                 }
             }
         }
+        // game over
+        this.sounds.game_over.ele = document.createElement("audio");
+        this.sounds.game_over.ele.src = this.sounds.game_over.src;
+        this.sounds.game_over.ele.setAttribute("preload", "auto");
+        this.sounds.game_over.ele.setAttribute("controls", "none");
+        this.sounds.game_over.ele.style.display = "none";
+        document.body.appendChild(this.sounds.game_over.ele);
     },
 
     playMenu: function() {
@@ -70,8 +77,6 @@ SoundPool.prototype = {
     },
 
     playGameOver: function() {
-        if(this.sounds.game_over == true) { return false; }
-        this.sounds.game_over.played = true;
         for(var soundName in this.sounds) {
             var sound = this.sounds[soundName];
             if(soundName == 'menu' || soundName == 'level_1') {
@@ -79,18 +84,11 @@ SoundPool.prototype = {
                 sound.snd.currentTime = 0;
             }
         }
-        if(tmp == false) {
-            console.log(this.sounds);
-            tmp = true;
-        }
         // this.sounds.game_over.snd.play();
-        this.sounds.game_over.snd = document.createElement("audio");
-        this.sounds.game_over.snd.src = this.sounds.game_over.src;
-        this.sounds.game_over.snd.setAttribute("preload", "auto");
-        this.sounds.game_over.snd.setAttribute("controls", "none");
-        this.sounds.game_over.snd.style.display = "none";
-        document.body.appendChild(this.sounds.game_over.snd);
-        this.sounds.game_over.snd.play();
+        if(this.sounds.game_over.played == false) {
+            this.sounds.game_over.ele.play();
+            this.sounds.game_over.played = true;
+        }
     },
 
     playShoot: function() {
