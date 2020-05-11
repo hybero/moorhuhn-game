@@ -9,7 +9,7 @@ const Countdown = function (buffer, context) {
     this.width = this.context.canvas.width / 10; this.height = this.context.canvas.height / 4;
     this.spriteWidth = 64; this.spriteHeight = 82;
     this.timeConverted = { minutes: 0, seconds: 0 };
-    this.timeStart = 10; // 180 sec - 3 min
+    this.timeStart = 180; // 180 sec - 3 min
     this.time = this.timeStart;
     this.active = false;
     this.min = { val: 0, x: this.context.canvas.width / 16, y: 20, spriteX: 0, spriteY: 0 }; // pozicia cifry na canvase, pozicia spritu danej cifry

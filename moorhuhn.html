@@ -55,21 +55,22 @@
                 MENU: 1,
                 PAUSED: 2,
                 RUNNING: 3,
-                STOPPED: 4
+                STOPPED: 4,
+                ABOUT: 5,
+                SETTINGS: 6,
+                LEVEL_1: 7,
+                GAME_OVER: 8
             };
 
             var gameState = GAMESTATE.INTRO;
 
-            const GAMEPAGE = {
-                INTRO: 0,
-                MENU: 1,
-                ABOUT: 2,
-                SETTINGS: 3,
-                LEVEL_1: 4,
-                GAME_OVER: 5
-            };
+            // const GAMEPAGE = {
+            //     INTRO: 0,
+            //     MENU: 1,
+            //
+            // };
 
-            var gamePage = GAMEPAGE.INTRO;
+            // var gamePage = GAMEPAGE.INTRO;
 
             var buttons = {
                 menu: {
@@ -162,7 +163,7 @@
                 switch (gameState) {
                     case GAMESTATE.INTRO:
                         gameState = GAMESTATE.MENU;
-                        gamePage = GAMEPAGE.MENU;
+                        // gamePage = GAMEPAGE.MENU;
                         break;
                     case GAMESTATE.STOPPED:
                         continueClick(event.clientX, event.clientY);
@@ -185,7 +186,7 @@
             document.addEventListener('keyup', function(event) {
                 if(gameState == GAMESTATE.INTRO) {
                     gameState = GAMESTATE.MENU;
-                    gamePage = GAMEPAGE.MENU;
+                    // gamePage = GAMEPAGE.MENU;
                 }
 
                 // stlacenim medzernika sa zasobnik prebije
@@ -196,8 +197,8 @@
 
                 // stlacenim ESC alebo P sa beziaca hra pauzne
                 if(event.keyCode === 27 || event.keyCode === 80) {
-                    if(gamePage === GAMEPAGE.GAME_OVER) {
-                        gamePage = GAMEPAGE.MENU;
+                    if(gameState === GAMESTATE.GAME_OVER) {
+                        // gamePage = GAMEPAGE.MENU;
                         gameState = GAMESTATE.MENU;
                     }
                     if(gameState === GAMESTATE.RUNNING) {
@@ -486,7 +487,7 @@
             function gameOver() {
                 soundPool.playGameOver();
 
-                gamePage = GAMEPAGE.GAME_OVER;
+                // gamePage = GAMEPAGE.GAME_OVER;
                 gameState = GAMESTATE.STOPPED;
 
                 // zastav cele diane v leveli
@@ -512,7 +513,7 @@
                 var button = buttons.game_over.continue;
                 if(clientX >= button.x && clientX <= button.x + button.w && clientY >= button.y && clientY <= button.y + button.h) {
                     gameState = GAMESTATE.MENU;
-                    gamePage = GAMEPAGE.MENU;
+                    // gamePage = GAMEPAGE.MENU;
                 }
             }
 
@@ -527,10 +528,12 @@
                                 gameState = GAMESTATE.RUNNING;
                                 break;
                             case 'about':
-                                gamePage = GAMEPAGE.ABOUT;
+                                // gamePage = GAMEPAGE.ABOUT;
+                                gameState = GAMESTATE.ABOUT;
                                 break;
                             case 'settings':
-                                gamePage = GAMEPAGE.SETTINGS;
+                                // gamePage = GAMEPAGE.SETTINGS;
+                                gameState = GAMESTATE.ABOUT;
                                 break;
                             default:
                                 break;
@@ -696,27 +699,27 @@
                 buffer.imageSmoothingEnabled = true;
                 context.imageSmoothingEnabled = true;
 
-                if(gamePage == GAMEPAGE.INTRO) {
+                if(gameState == GAMESTATE.INTRO) {
                     intro();
                 }
 
-                if(gamePage == GAMEPAGE.ABOUT) {
+                if(gameState == GAMESTATE.ABOUT) {
                     about();
                 }
 
-                if(gamePage == GAMEPAGE.SETTINGS) {
+                if(gameState == GAMESTATE.SETTINGS) {
                     settings();
                 }
 
-                if(gameState == GAMESTATE.RUNNING || gameState == GAMESTATE.PAUSED || gamePage == GAMEPAGE.GAME_OVER) {
+                if(gameState == GAMESTATE.RUNNING || gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.GAME_OVER) {
                     level1();
                 }
 
-                if( (gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) && gamePage == GAMEPAGE.MENU) {
+                if(gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) {
                     menu();
                 }
 
-                if(gamePage == GAMEPAGE.GAME_OVER) {
+                if(gameState == GAMESTATE.GAME_OVER) {
                     gameOver();
                 }
 
