@@ -54,7 +54,29 @@ SoundPool.prototype = {
         document.body.appendChild(this.sounds.game_over.ele);
     },
 
+    mute: function() {
+        // Mutni jeden element
+        function muteMe(elem) {
+            //elem.muted = true;
+            elem.pause();
+            // console.log(elem.muted);
+            // console.log(elem);
+        }
+        // vsetky elementy mutni
+        document.querySelectorAll("audio").forEach( elem => muteMe(elem) );
+    },
+
+    unMute: function() {
+        // function unMuteMe(elem) {
+        //     // elem.muted = false;
+        //     elem.play();
+        // }
+        // // vsetky elementy unmutni
+        // document.querySelectorAll("audio").forEach( elem => unMuteMe(elem) );
+    },
+
     playMenu: function() {
+        if(settings.audio === false) { return false; }
         for(var soundName in this.sounds) {
             var sound = this.sounds[soundName];
             if(soundName == 'level_1' || soundName == 'game_over') {
@@ -66,6 +88,7 @@ SoundPool.prototype = {
     },
 
     playLevel_1: function() {
+        if(settings.audio === false) { return false; }
         for(var soundName in this.sounds) {
             var sound = this.sounds[soundName];
             if(soundName == 'menu' || soundName == 'game_over') {
@@ -77,6 +100,7 @@ SoundPool.prototype = {
     },
 
     playGameOver: function() {
+        if(settings.audio === false) { return false; }
         for(var soundName in this.sounds) {
             var sound = this.sounds[soundName];
             if(soundName == 'menu' || soundName == 'level_1') {
@@ -92,6 +116,7 @@ SoundPool.prototype = {
     },
 
     playShoot: function() {
+        if(settings.audio === false) { return false; }
         var id = this.makeid(100);
         this.overlaying[id] = this.sounds.shoot;
         this.overlaying[id].snd = new Audio(this.sounds.shoot.src);
@@ -104,6 +129,7 @@ SoundPool.prototype = {
     },
 
     playReload: function() {
+        if(settings.audio === false) { return false; }
         var id = this.makeid(100);
         this.overlaying[id] = this.sounds.reload;
         this.overlaying[id].snd = new Audio(this.sounds.reload.src);

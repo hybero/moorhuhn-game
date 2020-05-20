@@ -64,13 +64,10 @@
 
             var gameState = GAMESTATE.INTRO;
 
-            // const GAMEPAGE = {
-            //     INTRO: 0,
-            //     MENU: 1,
-            //
-            // };
-
-            // var gamePage = GAMEPAGE.INTRO;
+            var SETTINGS = {
+                FULLSCREEN: false,
+                AUDIO: true
+            };
 
             var buttons = {};
 
@@ -100,7 +97,23 @@
                             x: width/2,
                             y: ( (height / 3) * 2 ), // 310
                             w: 186,
-                            h: buttons.size
+                            h: buttons.size,
+                            b: {
+                                fullscreen: {
+                                    w: 196,
+                                    h: buttons.size,
+                                    x: width/2 - 98,
+                                    cx: width/2 - 196,
+                                    y: ( (height / 3) * 1 ) // 310
+                                },
+                                audio: {
+                                    w: 100,
+                                    h: buttons.size,
+                                    x: width/2 - 50,
+                                    cx: width/2 - 100,
+                                    y: ( (height / 3) * 1.3 ) // 310
+                                }
+                            }
                         }
                     },
                     game_over: {
@@ -184,6 +197,12 @@
                     case GAMESTATE.MENU:
                         menuOnClick(event.clientX, event.clientY);
                         break;
+                    case GAMESTATE.SETTINGS:
+                        settingsOnClick(event.clientX, event.clientY);
+                        break;
+                    case GAMESTATE.ABOUT:
+                        aboutOnClick(event.clientX, event.clientY);
+                        break;
                     case GAMESTATE.PAUSED:
                         menuOnClick(event.clientX, event.clientY);
                         break;
@@ -195,7 +214,7 @@
                 }
             });
 
-            // zachytavanie stlacenie medzernika
+            // zachytavanie stlacenie klavesy
             document.addEventListener('keyup', function(event) {
                 if(gameState == GAMESTATE.INTRO) {
                     gameState = GAMESTATE.MENU;
@@ -546,7 +565,7 @@
                                 break;
                             case 'settings':
                                 // gamePage = GAMEPAGE.SETTINGS;
-                                gameState = GAMESTATE.ABOUT;
+                                gameState = GAMESTATE.SETTINGS;
                                 break;
                             default:
                                 break;
@@ -554,6 +573,71 @@
                         return false;
                     }
                 }
+            }
+
+            function settingsOnClick(clientX, clientY) {
+                soundPool.playShoot();
+                for(var buttonName in buttons.menu.settings.b) {
+                    var button = buttons.menu.settings.b[buttonName];
+                    // console.log('('+clientX + '  ' +clientY + ') '+button.x+' '+button.y);
+                    if(clientX >= button.cx && clientX <= button.cx + button.w && clientY >= button.y && clientY <= button.y + button.h) {
+                        // console.log(buttonName);
+                        switch (buttonName) {
+                            case 'fullscreen':
+                                SETTINGS.FULLSCREEN = !SETTINGS.FULLSCREEN;
+                                if(SETTINGS.FULLSCREEN === true) {
+                                    openFullscreen();
+                                } else {
+                                    closeFullscreen();
+                                }
+                                break;
+                            case 'audio':
+                                SETTINGS.AUDIO = !SETTINGS.AUDIO;
+                                if(SETTINGS.AUDIO === false) {
+                                    soundPool.mute();
+                                }
+                                break;
+                            case 'back':
+                                // :TODO
+                                break;
+                            default:
+                                break;
+                        }
+                        return false;
+                    }
+                }
+            }
+
+            var docEle = document.documentElement;
+
+            // Zapni fullscreen
+            function openFullscreen() {
+                if (docEle.requestFullscreen) {
+                    docEle.requestFullscreen();
+                } else if (docEle.mozRequestFullScreen) { /* Firefox */
+                    docEle.mozRequestFullScreen();
+                } else if (docEle.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    docEle.webkitRequestFullscreen();
+                } else if (docEle.msRequestFullscreen) { /* IE/Edge */
+                    docEle.msRequestFullscreen();
+                }
+            }
+
+            // Vypni fullscreen
+            function closeFullscreen() {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.msExitFullscreen();
+                }
+            }
+
+            function aboutOnClick(clientX, clientY) {
+
             }
 
             function resetLevel() {
@@ -589,7 +673,7 @@
             }
 
             function gameOverText() {
-                buffer.font = "50px Gomarice";
+                buffer.font = buttons.heading.h + "px Gomarice";
                 buffer.fillStyle = '#D95044';
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
@@ -599,7 +683,7 @@
             }
 
             function scoreText() {
-                buffer.font = "40px Gomarice";
+                buffer.font = buttons.size + "px Gomarice";
                 buffer.fillStyle = '#39D631';
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
@@ -609,7 +693,7 @@
             }
 
             function continueText() {
-                buffer.font = "40px Gomarice";
+                buffer.font = buttons.size + "px Gomarice";
                 buffer.fillStyle = '#FFE336';
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
@@ -663,24 +747,21 @@
             }
 
             function settings() {
-                if(gameState === GAMESTATE.MENU) {
-                    drawLandscape1();
-                    // soundPool.playMenu();
-                }
+                drawLandscape1();
 
                 drawGreyOverlay();
 
                 headingText();
 
                 // Buttony
-                buffer.font = "40px Gomarice";
+                buffer.font = buttons.size + "px Gomarice";
                 buffer.fillStyle = '#FFE336';
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
 
-                buffer.fillText('Sound', width/2, 150);
+                buffer.fillText('Audio', buttons.menu.settings.b.audio.x, buttons.menu.settings.b.audio.y);
 
-                buffer.fillText('Fullscreen', width/2, 230);
+                buffer.fillText('Fullscreen', buttons.menu.settings.b.fullscreen.x, buttons.menu.settings.b.fullscreen.y);
             }
 
             function runGame() {
