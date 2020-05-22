@@ -102,15 +102,15 @@
                                 fullscreen: {
                                     w: 196,
                                     h: buttons.size,
-                                    x: width/2 - 98,
-                                    cx: width/2 - 196,
+                                    x: width/2,
+                                    cx: width/2,
                                     y: ( (height / 3) * 1 ) // 310
                                 },
                                 audio: {
                                     w: 100,
                                     h: buttons.size,
-                                    x: width/2 - 50,
-                                    cx: width/2 - 100,
+                                    x: width/2,
+                                    cx: width/2,
                                     y: ( (height / 3) * 1.3 ) // 310
                                 }
                             }
@@ -218,7 +218,6 @@
             document.addEventListener('keyup', function(event) {
                 if(gameState == GAMESTATE.INTRO) {
                     gameState = GAMESTATE.MENU;
-                    // gamePage = GAMEPAGE.MENU;
                 }
 
                 // stlacenim medzernika sa zasobnik prebije
@@ -230,7 +229,6 @@
                 // stlacenim ESC alebo P sa beziaca hra pauzne
                 if(event.keyCode === 27 || event.keyCode === 80) {
                     if(gameState === GAMESTATE.GAME_OVER) {
-                        // gamePage = GAMEPAGE.MENU;
                         gameState = GAMESTATE.MENU;
                     }
                     if(gameState === GAMESTATE.RUNNING) {
@@ -255,7 +253,6 @@
                         luo[obj.id] = obj;
                     });
                     // teraz spustame gameLoop
-                    // console.log('--- Spustame Hru ---');
                     runGame();
                 }).catch((err) => {
                     console.error(err);
@@ -267,6 +264,7 @@
                 buffer.drawImage(luo.landscape1.img, 0, 0, luo.landscape1.width, luo.landscape1.height, 0, 0, buffer.canvas.width, buffer.canvas.height);
             }
 
+            // Generuj Moorhunov
             function generateMoorhuhns() {
                 if(gameState === GAMESTATE.PAUSED) { return false; }
                 // zvysujeme pocet povolenych moorhuhnov na vykreslenie postupne s ubudajucim casom
@@ -285,6 +283,8 @@
                 }
             }
 
+            // Priprava na mazanie Moorhuhnov. Ulozia sa do objektu na zmazanie a
+            // zmazu sa vo funkcii na zmazanie vsetkych mrtvych Moorhuhnov
             function deleteMoorhuhns() {
                 var toDelete = {};
 
@@ -302,6 +302,7 @@
                 return false;
             }
 
+            // Vymazanie Moorhuhnov po skonceni zomierajucej animacie
             function deleteAllMoorhuhns() {
                 var toDelete = {};
 
@@ -420,6 +421,7 @@
                 }
             }
 
+            // Pokracovanie animacie a pohybu Moorhuhnov
             function resumeMoorhuhns() {
                 for(var i in moorhuhns) {
                     var moorhuhn = moorhuhns[i];
@@ -432,6 +434,7 @@
                 pauseMoorhuhns();
             }
 
+            // Vystrelenie
             function shoot(x, y) {
                 // ak mame prazdny zasobnik, nerob nic
                 if(ammo.isMagazineEmpty()) { return false; }
@@ -498,6 +501,8 @@
                 }
             }
 
+            // Intro - musi byt spustene na zacchytenie prveho vstupu uzivatela.
+            // !!! Audio subory sa nesmu spustat pred prvym vstupom od uzivatela !!!
             function intro() {
                 drawLandscape1();
 
@@ -506,6 +511,7 @@
                 pressAnyKeyText();
             }
 
+            // Prvy vstup od uzivatela
             function pressAnyKeyText() {
                 buffer.font = "50px Gomarice";
                 buffer.fillStyle = '#FFE336';
@@ -516,6 +522,7 @@
                 return false;
             }
 
+            // Game Over obrazovka
             function gameOver() {
                 soundPool.playGameOver();
 
@@ -529,6 +536,7 @@
                 drawGameOver();
             }
 
+            // Vykresli Game Over obrazovku
             function drawGameOver() {
                 drawGreyOverlay();
 
@@ -541,6 +549,7 @@
                 continueText();
             }
 
+            // Click na pokracovanie v Game Over obrazovke
             function continueClick(clientX, clientY) {
                 var button = buttons.game_over.continue;
                 if(clientX >= button.x && clientX <= button.x + button.w && clientY >= button.y && clientY <= button.y + button.h) {
@@ -549,6 +558,7 @@
                 }
             }
 
+            // Click v hlavnom Menu obrazovke
             function menuOnClick(clientX, clientY) {
                 soundPool.playShoot();
                 for(var buttonName in buttons.menu) {
@@ -575,6 +585,7 @@
                 }
             }
 
+            // Click na buttony v Menu --> Settings
             function settingsOnClick(clientX, clientY) {
                 soundPool.playShoot();
                 for(var buttonName in buttons.menu.settings.b) {
@@ -608,6 +619,7 @@
                 }
             }
 
+            // Zachytenie document elementu - na vyvolanie fullscreenu
             var docEle = document.documentElement;
 
             // Zapni fullscreen
@@ -636,10 +648,12 @@
                 }
             }
 
+            // Click v Menu --> About
             function aboutOnClick(clientX, clientY) {
 
             }
 
+            // Resetovanie Levelu 1 - Po clicknuti na Continue v Game Over obrazovke
             function resetLevel() {
                 countdown.initTime();
                 score.initScore();
@@ -653,8 +667,8 @@
                 soundPool.sounds.game_over.played = false;
             }
 
+            // Nadpis - "Moorhuhn Texas"
             function headingText() {
-                // Nadpis
                 buffer.font = buttons.heading.h + "px Gomarice";
                 buffer.fillStyle = '#FFA936';
                 buffer.textBaseline = 'top';
@@ -664,14 +678,15 @@
                 return false;
             }
 
+            // Sedy overlay - pouzivany vsade okrem beziaceho levelu
             function drawGreyOverlay() {
-                // grey overlay
                 buffer.fillStyle = "rgba(32, 45, 21, 0.3)";
                 buffer.fillRect(0, 0, width, height);
 
                 return false;
             }
 
+            // Text Game Over v Game Over obrazovke
             function gameOverText() {
                 buffer.font = buttons.heading.h + "px Gomarice";
                 buffer.fillStyle = '#D95044';
@@ -682,6 +697,7 @@
                 return false;
             }
 
+            // Text Score v Game Over obrazovke
             function scoreText() {
                 buffer.font = buttons.size + "px Gomarice";
                 buffer.fillStyle = '#39D631';
@@ -692,6 +708,7 @@
                 return false;
             }
 
+            // Text Continue v Game Over obrazovke
             function continueText() {
                 buffer.font = buttons.size + "px Gomarice";
                 buffer.fillStyle = '#FFE336';
@@ -702,6 +719,7 @@
                 return false;
             }
 
+            // Obrazovka Menu
             function menu() {
                 if(gameState === GAMESTATE.MENU) {
                     drawLandscape1();
@@ -725,16 +743,19 @@
                 buffer.fillText('Settings', buttons.menu.settings.x, buttons.menu.settings.y);
             }
 
+            // Stlacenie klavesy pre pauznutie levelu
             function pauseGame() {
                 gameState = GAMESTATE.PAUSED;
                 pauseMoorhuhns();
             }
 
+            // Pokracovanie v leveli
             function resumeGame() {
                 gameState = GAMESTATE.RUNNING;
                 resumeMoorhuhns();
             }
 
+            // Vycistenie bufferu a canvasu po vykresleni kazdej iteracie
             function clear() {
                 buffer.clearRect(0, 0, width, height);
                 context.clearRect(0, 0, width, height);
@@ -742,10 +763,12 @@
                 return false;
             }
 
+            // Click na Menu --> About
             function about() {
 
             }
 
+            // Click na Menu --> Settings
             function settings() {
                 drawLandscape1();
 
@@ -757,13 +780,28 @@
                 buffer.font = buttons.size + "px Gomarice";
                 buffer.fillStyle = '#FFE336';
                 buffer.textBaseline = 'top';
-                buffer.textAlign = 'center';
+                buffer.textAlign = 'end';
 
+                // Text
                 buffer.fillText('Audio', buttons.menu.settings.b.audio.x, buttons.menu.settings.b.audio.y);
+                // Checkbox
+                if(SETTINGS.AUDIO == true) { // Checked
+                    buffer.drawImage(checkbox_c.img, checkbox_c.x, checkbox_c.y, checkbox_c.width, checkbox_c.height);
+                } else { // Unchecked
+                    buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
+                }
 
+                // Text
                 buffer.fillText('Fullscreen', buttons.menu.settings.b.fullscreen.x, buttons.menu.settings.b.fullscreen.y);
+                // Checkbox
+                if(SETTINGS.FULLSCREEN == true) { // Checked
+                    buffer.drawImage(checkbox_c.img, checkbox_c.x, checkbox_c.y, checkbox_c.width, checkbox_c.height);
+                } else { // Unchecked
+                    buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
+                }
             }
 
+            // Game Loop
             function runGame() {
                 clear();
 
