@@ -17,6 +17,7 @@
         <script type="text/javascript" src="./js/Cactus.js"></script>
         <script type="text/javascript" src="./js/Ammo.js"></script>
         <script type="text/javascript" src="./js/SoundPool_2.js"></script>
+        <script type="text/javascript" src="./js/Checkbox.js"></script>
     </head>
     <body>
 
@@ -186,6 +187,10 @@
             var ammo = new Ammo(buffer, context);
 
             var crosshair = new Crosshair();
+
+            var checkbox_c = new Checkbox(1, true);
+
+            var checkbox_u = new Checkbox(2, false);
 
             // disablnutie right-cliku na canvase
             context.canvas.addEventListener('contextmenu', event => event.preventDefault());
@@ -803,11 +808,12 @@
                 // Text
                 buffer.fillText('Fullscreen', buttons.menu.settings.b.fullscreen.x, buttons.menu.settings.b.fullscreen.y);
                 // Checkbox
-                // if(SETTINGS.FULLSCREEN == true) { // Checked
-                //     buffer.drawImage(checkbox_c.img, checkbox_c.x, checkbox_c.y, checkbox_c.width, checkbox_c.height);
-                // } else { // Unchecked
-                //     buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
-                // }
+                console.log('SETTINGS.FULLSCREEN == ' + SETTINGS.FULLSCREEN);
+                if(SETTINGS.FULLSCREEN == true) { // Checked
+                    buffer.drawImage(checkbox_c.img, checkbox_c.x, checkbox_c.y, checkbox_c.width, checkbox_c.height);
+                } else { // Unchecked
+                    buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
+                }
 
                 buffer.textAlign = 'center';
 
