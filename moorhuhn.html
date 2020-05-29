@@ -523,11 +523,11 @@
 
             // Prvy vstup od uzivatela
             function pressAnyKeyText() {
-                buffer.font = "50px Gomarice";
+                buffer.font = buttons.size * 1.4 + "px Gomarice";
                 buffer.fillStyle = '#FFE336';
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
-                buffer.fillText('Press Any Key', width/2, height/2 - 40); // y = 150
+                buffer.fillText('Press Any Key', width/2, height/2 - buttons.size * 1.4 / 2); // y = 150
 
                 return false;
             }
