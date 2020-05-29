@@ -119,9 +119,9 @@
                                 back: {
                                     h: buttons.size,
                                     x: width/2,
-                                    cx:width/2 - buttons.size * 3.3,
-                                    y: height / 3 * 1.6, // 310
-                                    w: buttons.size * 4.0 + buttons.size * 4
+                                    cx:width/2 - buttons.size * 3.3 / 2,
+                                    y: height / 3 * 2.0, // 310
+                                    w: buttons.size * 3.7
                                 }
                             }
                         }
@@ -618,7 +618,7 @@
                                 }
                                 break;
                             case 'back':
-                                // :TODO
+                                gameState = GAMESTATE.MENU;
                                 break;
                             default:
                                 break;
@@ -808,6 +808,11 @@
                 // } else { // Unchecked
                 //     buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
                 // }
+
+                buffer.textAlign = 'center';
+
+                // Back
+                buffer.fillText('Back', buttons.menu.settings.b.back.x, buttons.menu.settings.b.back.y);
             }
 
             // Game Loop
