@@ -3,7 +3,7 @@ const MoorhuhnFlying = function (id, d, ccw, cch, imgSrc, imgDeadSrc, img, imgDe
     this.id = id || null;
     this.aspectRatio = 1;
     this.ccw = ccw; this.cch = cch;
-    this.minWidth = this.ccw / 30; this.maxWidth = this.ccw / 12; // min a max pre nahodne zvolenie velkosti - kvoli pouzitiu context hodnot, treba vytvarat novych mooorhuhnov az ked mame context!
+    this.minWidth = this.ccw / 30; this.maxWidth = this.ccw / 12; this.widthDif = this.maxWidth - this.minWidth; // min a max pre nahodne zvolenie velkosti - kvoli pouzitiu context hodnot, treba vytvarat novych mooorhuhnov az ked mame context!
     this.width = getRandomInt(this.minWidth, this.maxWidth); this.height = this.width / this.aspectRatio;
     this.d = d;
     this.x = this.d > 0 ? 0 - this.width : this.ccw, this.y = getRandomInt(30, cch - 30 - this.height);
@@ -41,17 +41,16 @@ const MoorhuhnFlying = function (id, d, ccw, cch, imgSrc, imgDeadSrc, img, imgDe
     this.img = img || null; this.imgSrc = imgSrc;
     this.imgDead = imgDead || null; this.imgDeadSrc = imgDeadSrc;
     this.useImg = this.img;
-    this.points = null;
-    switch (this.width) { // podla velkosti moorhuna sa mu prida bodova hodnota
-        case this.width <= this.maxWidth * 0.33:
-            this.points = 25;
-            break;
-        case this.width <= this.maxWidth * 0.66:
-            this.points = 15;
-            break;
-        default:
-            this.points = 10;
-            break;
+    this.pointsLow = 10;
+    this.pointsMed = 15;
+    this.pointsHigh = 25;
+    this.points = this.pointsLow;
+    // podla velkosti moorhuna sa mu prida bodova hodnota
+    if(this.width <= this.maxWidth - this.widthDif / 2) {
+        this.points = this.pointsMed;
+    }
+    if(this.width <= this.maxWidth - this.widthDif / 1.5) {
+        this.points = this.pointsHigh;
     }
 };
 MoorhuhnFlying.prototype = {
