@@ -1,5 +1,5 @@
 // Checkbox
-const Checkbox = function (id, checked) {
+const Checkbox = function (id, checked, w) {
     this.id = 'checkbox_'+id;
     this.x = null, this.y = null;
     this.img = null;
@@ -12,7 +12,7 @@ const Checkbox = function (id, checked) {
     } else {
         this.imgSrc = this.uImgSrc;
     }
-    this.width = 60; this.height = 60;
+    this.width = w; this.height = w;
     this.spriteWidth = 200; this.spriteHeight = 200;
 };
 Checkbox.prototype = {
@@ -21,6 +21,12 @@ Checkbox.prototype = {
 
         this.x = x;
         this.y = y;
+    },
+
+    setDimensions: function(w) {
+
+        this.width = w;
+        this.height = w;
     }
 
 };

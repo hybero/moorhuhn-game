@@ -46,6 +46,7 @@
             var id_log = 0; // log posledneho id moorhuhna
             var imagesLoaded = false;
             var stopAnimations = false; // pouziva sa pri game over // nebude sa pouzivat - kazdy objekt bude mat vlastny stav stopovania movementu a animacie
+            var checkboxesCreated = false;
 
             var gameLoop_i = 0; // pocitame iteracie v hernom loope
 
@@ -108,14 +109,16 @@
                                     x: width/2,
                                     cx:width/2 - buttons.size * 6.4,
                                     y: height / 3 * 1, // 310
-                                    w: buttons.size * 6.0 + buttons.size * 4
+                                    w: buttons.size * 6.0 + buttons.size * 4,
+                                    bx:buttons.size * 6.0 + buttons.size * 3
                                 },
                                 audio: {
                                     h: buttons.size,
                                     x: width/2,
                                     cx:width/2 - buttons.size * 4.0,
                                     y: height / 3 * 1.3, // 310
-                                    w: buttons.size * 4.0 + buttons.size * 4
+                                    w: buttons.size * 4.0 + buttons.size * 4,
+                                    bx:buttons.size * 6.0 + buttons.size * 3
                                 },
                                 back: {
                                     h: buttons.size,
@@ -188,9 +191,9 @@
 
             var crosshair = new Crosshair();
 
-            var checkbox_c = new Checkbox(1, true);
+            var checkbox_c = new Checkbox('checked', true, buttons.size);
 
-            var checkbox_u = new Checkbox(2, false);
+            var checkbox_u = new Checkbox('unchecked', false, buttons.size);
 
             // disablnutie right-cliku na canvase
             context.canvas.addEventListener('contextmenu', event => event.preventDefault());
@@ -205,7 +208,6 @@
                 switch (gameState) {
                     case GAMESTATE.INTRO:
                         gameState = GAMESTATE.MENU;
-                        // gamePage = GAMEPAGE.MENU;
                         break;
                     case GAMESTATE.STOPPED:
                         continueClick(event.clientX, event.clientY);
@@ -256,7 +258,7 @@
             });
 
             // objekty za sebou v liste
-            var objects = [landscape1, moorhuhnFlyLeft, moorhuhnFlyRight, crosshair, countdown, score, ammo];
+            var objects = [landscape1, moorhuhnFlyLeft, moorhuhnFlyRight, crosshair, countdown, score, ammo, checkbox_c, checkbox_u];
 
             // loaded unique objects - objekt vsetkych unikatnych objektov s loadnutymi obrazkami
             var luo = {};
@@ -377,13 +379,9 @@
                 // vykresli kazdu cifru score od posledneho zprava dolava
                 score.ciphersRev.forEach(function (item, index) {
                     var cipher = item;
-
                     var spriteX = 0;
-
                     var spriteY = item * score.spriteHeight;
-
                     var x = width - 20 - (index * score.width + score.width);
-
                     var y = 20;
 
                     // vykreslujeme
@@ -402,11 +400,8 @@
 
                 // vykresli kazdy naboj v zasobniku
                 for(var i = 1; i <= ammo.magazine; i++) { // for mozeme robit aj odpocitavanim, co je lepsie pre performance
-
                     var x = width - 20 - (i * ammo.width);
-
                     if(i > 0) { x += -5 * i; } // 5 // okrem prveho cisla zprava, kazdemu dalsiemu pridaj medzeru // bez medzery to vyzera lepsie
-
                     buffer.drawImage(ammo.img, spriteX, spriteY, ammo.spriteWidth, ammo.spriteHeight, x, y, ammo.width, ammo.height);
                 }
             }
@@ -519,10 +514,13 @@
             // Intro - musi byt spustene na zacchytenie prveho vstupu uzivatela.
             // !!! Audio subory sa nesmu spustat pred prvym vstupom od uzivatela !!!
             function intro() {
+                // Vykresli pozadie
                 drawLandscape1();
 
+                // Vykresli sedy overlay
                 drawGreyOverlay();
 
+                // Vykresli text
                 pressAnyKeyText();
             }
 
@@ -553,14 +551,19 @@
 
             // Vykresli Game Over obrazovku
             function drawGameOver() {
+                // Sedy overlay
                 drawGreyOverlay();
 
+                // Nadpis
                 headingText();
 
+                // Game Over text
                 gameOverText();
 
+                // Score
                 scoreText();
 
+                // Continue button
                 continueText();
             }
 
@@ -810,15 +813,20 @@
                 // Checkbox
                 console.log('SETTINGS.FULLSCREEN == ' + SETTINGS.FULLSCREEN);
                 if(SETTINGS.FULLSCREEN == true) { // Checked
-                    buffer.drawImage(checkbox_c.img, checkbox_c.x, checkbox_c.y, checkbox_c.width, checkbox_c.height);
+                    buffer.drawImage(checkbox_c.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.y, buttons.size, buttons.size);
                 } else { // Unchecked
-                    buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
+                    buffer.drawImage(checkbox_u.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.y, buttons.size, buttons.size);
                 }
 
                 buffer.textAlign = 'center';
 
                 // Back
                 buffer.fillText('Back', buttons.menu.settings.b.back.x, buttons.menu.settings.b.back.y);
+            }
+
+            function updateCheckboxes() {
+                checkbox_c.setDimensions(buttons.size);
+                checkbox_u.setDimensions(buttons.size);
             }
 
             // Game Loop
@@ -851,10 +859,9 @@
                 buffer.imageSmoothingEnabled = true;
                 context.imageSmoothingEnabled = true;
 
-                // calcButtons(); // vypocitaj dimenzie pre tlacitka
-
                 if(gameState !== GAMESTATE.RUNNING) {
                     calcButtons(); // vypocitaj dimenzie pre tlacitka
+                    updateCheckboxes(); // vypocitaj dimenzie pre checkboxy
                 }
 
                 if(gameState == GAMESTATE.INTRO) {
