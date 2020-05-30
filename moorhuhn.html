@@ -71,6 +71,8 @@
                 AUDIO: true
             };
 
+            var PAUSED = false;
+
             var buttons = {};
 
             function calcButtons() {
@@ -274,7 +276,9 @@
                     }
                     if(gameState === GAMESTATE.RUNNING) {
                         pauseGame();
-                    } else if(gameState === GAMESTATE.PAUSED) {
+                    } else if(gameState === GAMESTATE.PAUSED || (gameState === GAMESTATE.MENU && PAUSED == true)) {
+                        resumeGame();
+                    } else if((gameState === GAMESTATE.ABOUT && PAUSED == true) || (gameState === GAMESTATE.SETTINGS && PAUSED == true)) {
                         resumeGame();
                     }
                 }
@@ -762,8 +766,11 @@
             // Obrazovka Menu
             function menu() {
                 if(gameState === GAMESTATE.MENU) {
-                    drawLandscape1();
                     soundPool.playMenu();
+                }
+
+                if(PAUSED == false) {
+                    drawLandscape1();
                 }
 
                 drawGreyOverlay();
@@ -786,12 +793,14 @@
             // Stlacenie klavesy pre pauznutie levelu
             function pauseGame() {
                 gameState = GAMESTATE.PAUSED;
+                PAUSED = true;
                 pauseMoorhuhns();
             }
 
             // Pokracovanie v leveli
             function resumeGame() {
                 gameState = GAMESTATE.RUNNING;
+                PAUSED = false;
                 resumeMoorhuhns();
             }
 
@@ -805,7 +814,9 @@
 
             // Click na Menu --> About
             function about() {
-                drawLandscape1();
+                if(PAUSED == false) {
+                    drawLandscape1();
+                }
 
                 drawGreyOverlay();
 
@@ -816,7 +827,9 @@
 
             // Click na Menu --> Settings
             function settings() {
-                drawLandscape1();
+                if(PAUSED == false) {
+                    drawLandscape1();
+                }
 
                 drawGreyOverlay();
 
@@ -896,16 +909,17 @@
                     intro();
                 }
 
+                // if(gameState == GAMESTATE.RUNNING || gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.GAME_OVER) {
+                if(gameState == GAMESTATE.RUNNING || gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.GAME_OVER || PAUSED == true) {
+                    level1();
+                }
+
                 if(gameState == GAMESTATE.ABOUT) {
                     about();
                 }
 
                 if(gameState == GAMESTATE.SETTINGS) {
                     settings();
-                }
-
-                if(gameState == GAMESTATE.RUNNING || gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.GAME_OVER) {
-                    level1();
                 }
 
                 if(gameState == GAMESTATE.PAUSED || gameState == GAMESTATE.MENU) {
