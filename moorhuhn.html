@@ -256,6 +256,11 @@
                     gameState = GAMESTATE.MENU;
                 }
 
+                // stlacenim ESC v About a Settings sa vrati do menu
+                if(event.keyCode === 27 && (gameState == GAMESTATE.ABOUT || gameState == GAMESTATE.SETTINGS)) {
+                    gameState = GAMESTATE.MENU;
+                }
+
                 // stlacenim medzernika sa zasobnik prebije
                 if(event.keyCode === 32 && gameState == GAMESTATE.RUNNING) {
                     ammo.reloadMagazine();
@@ -598,8 +603,8 @@
                 soundPool.playShoot();
                 for(var buttonName in buttons.menu) {
                     var button = buttons.menu[buttonName];
-                    console.log('('+clientX + '  ' +clientY + ') '+button.cx+' '+button.y);
-                    console.log(buttonName);
+                    // console.log('('+clientX + '  ' +clientY + ') '+button.cx+' '+button.y);
+                    // console.log(buttonName);
                     if(clientX >= button.cx && clientX <= button.cx + button.w && clientY >= button.y && clientY <= button.y + button.h) {
                         switch (buttonName) {
                             case 'start':
@@ -625,9 +630,9 @@
                 soundPool.playShoot();
                 for(var buttonName in buttons.menu.settings.b) {
                     var button = buttons.menu.settings.b[buttonName];
-                    console.log('('+clientX + '  ' +clientY + ') '+button.cx+' '+button.y);
+                    // console.log('('+clientX + '  ' +clientY + ') '+button.cx+' '+button.y);
                     if(clientX >= button.cx && clientX <= button.cx + button.w && clientY >= button.y && clientY <= button.y + button.h) {
-                        console.log(buttonName);
+                        // console.log(buttonName);
                         switch (buttonName) {
                             case 'fullscreen':
                                 SETTINGS.FULLSCREEN = !SETTINGS.FULLSCREEN;
@@ -835,7 +840,6 @@
                 // Text
                 buffer.fillText('Fullscreen', buttons.menu.settings.b.fullscreen.x, buttons.menu.settings.b.fullscreen.y);
                 // Checkbox
-                console.log('SETTINGS.FULLSCREEN == ' + SETTINGS.FULLSCREEN);
                 if(SETTINGS.FULLSCREEN == true) { // Checked
                     buffer.drawImage(checkbox_c.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.by, buttons.menu.settings.b.fullscreen.bw, buttons.menu.settings.b.fullscreen.bh);
                 } else { // Unchecked
