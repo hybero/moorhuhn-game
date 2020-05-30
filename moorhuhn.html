@@ -109,8 +109,11 @@
                                     x: width/2,
                                     cx:width/2 - buttons.size * 6.4,
                                     y: height / 3 * 1, // 310
-                                    w: buttons.size * 6.0 + buttons.size * 4,
-                                    bx:buttons.size * 6.0 + buttons.size * 3
+                                    w: buttons.size * 6.4 + buttons.size * 4,
+                                    bw: buttons.size * 0.8,
+                                    bh: buttons.size * 0.8,
+                                    bx: width/2 + buttons.size * 3 + (1 - 0.8) / 2,
+                                    by: height / 3 * 1 + (1 - 0.8) / 2
                                 },
                                 audio: {
                                     h: buttons.size,
@@ -118,7 +121,10 @@
                                     cx:width/2 - buttons.size * 4.0,
                                     y: height / 3 * 1.3, // 310
                                     w: buttons.size * 4.0 + buttons.size * 4,
-                                    bx:buttons.size * 6.0 + buttons.size * 3
+                                    bw: buttons.size * 0.8,
+                                    bh: buttons.size * 0.8,
+                                    bx: width/2 + buttons.size * 3 + (1 - 0.8) / 2,
+                                    by: height / 3 * 1.3 + (1 - 0.8) / 2
                                 },
                                 back: {
                                     h: buttons.size,
@@ -802,20 +808,20 @@
                 // Text
                 buffer.fillText('Audio', buttons.menu.settings.b.audio.x, buttons.menu.settings.b.audio.y);
                 // Checkbox
-                // if(SETTINGS.AUDIO == true) { // Checked
-                //     buffer.drawImage(checkbox_c.img, checkbox_c.x, checkbox_c.y, checkbox_c.width, checkbox_c.height);
-                // } else { // Unchecked
-                //     buffer.drawImage(checkbox_u.img, checkbox_u.x, checkbox_u.y, checkbox_u.width, checkbox_u.height);
-                // }
+                if(SETTINGS.AUDIO == true) { // Checked
+                    buffer.drawImage(checkbox_c.img, buttons.menu.settings.b.audio.bx, buttons.menu.settings.b.audio.by, buttons.menu.settings.b.audio.bw, buttons.menu.settings.b.audio.bh);
+                } else { // Unchecked
+                    buffer.drawImage(checkbox_u.img, buttons.menu.settings.b.audio.bx, buttons.menu.settings.b.audio.by, buttons.menu.settings.b.audio.bw, buttons.menu.settings.b.audio.bh);
+                }
 
                 // Text
                 buffer.fillText('Fullscreen', buttons.menu.settings.b.fullscreen.x, buttons.menu.settings.b.fullscreen.y);
                 // Checkbox
                 console.log('SETTINGS.FULLSCREEN == ' + SETTINGS.FULLSCREEN);
                 if(SETTINGS.FULLSCREEN == true) { // Checked
-                    buffer.drawImage(checkbox_c.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.y, buttons.size, buttons.size);
+                    buffer.drawImage(checkbox_c.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.by, buttons.menu.settings.b.fullscreen.bw, buttons.menu.settings.b.fullscreen.bh);
                 } else { // Unchecked
-                    buffer.drawImage(checkbox_u.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.y, buttons.size, buttons.size);
+                    buffer.drawImage(checkbox_u.img, buttons.menu.settings.b.fullscreen.bx, buttons.menu.settings.b.fullscreen.by, buttons.menu.settings.b.fullscreen.bw, buttons.menu.settings.b.fullscreen.bh);
                 }
 
                 buffer.textAlign = 'center';
