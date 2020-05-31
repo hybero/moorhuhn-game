@@ -57,11 +57,10 @@
                 MENU: 1,
                 PAUSED: 2,
                 RUNNING: 3,
-                STOPPED: 4,
+                GAME_OVER: 4,
                 ABOUT: 5,
                 SETTINGS: 6,
-                LEVEL_1: 7,
-                GAME_OVER: 8
+                LEVEL_1: 7
             };
 
             var gameState = GAMESTATE.INTRO;
@@ -152,7 +151,19 @@
                         continue: {
                             x: width/2,
                             cx: width/2 - buttons.size * 5.5 / 2,
-                            y: height / 3 * 1.6,
+                            y: height / 3 * 2.5,
+                            h: buttons.size,
+                            w: buttons.size * 5.5
+                        },
+                        gameover: {
+                            x: width/2,
+                            y: height / 4 * 1.2,
+                            h: buttons.size,
+                            w: buttons.size * 5.5
+                        },
+                        score: {
+                            x: width/2,
+                            y: height / 4 * 2.0,
                             h: buttons.size,
                             w: buttons.size * 5.5
                         }
@@ -263,7 +274,9 @@
 
             var colors = {
                 color_active: '#FFA936',
-                color_passive: '#FFE336'
+                color_passive: '#FFE336',
+                red: '#D95044',
+                green: '#39D631'
             };
 
             // funkcia na loadnutie obrazka/obrazkov pre jeden objekt
@@ -331,7 +344,7 @@
                     case GAMESTATE.INTRO:
                         gameState = GAMESTATE.MENU;
                         break;
-                    case GAMESTATE.STOPPED:
+                    case GAMESTATE.GAME_OVER:
                         continueClick(event.clientX, event.clientY);
                         break;
                     case GAMESTATE.MENU:
@@ -557,12 +570,15 @@
 
                 var i = 1;
 
+                var magazine = 5;
+
                 if(typeof x === 'undefined') {
                     var x = width - space_right_w;
+                    magazine = ammo.magazine;
                 }
 
                 // vykresli kazdy naboj v zasobniku
-                for(i; i <= ammo.magazine; i++) { // for mozeme robit aj odpocitavanim, co je lepsie pre performance
+                for(i; i <= magazine; i++) { // for mozeme robit aj odpocitavanim, co je lepsie pre performance
                     x += -space_bullet_w - w;
                     buffer.drawImage(ammo.img, spriteX, spriteY, ammo.spriteWidth, ammo.spriteHeight, x, y, w, h);
                 }
@@ -669,7 +685,7 @@
                 drawHud();
 
                 if(countdown.time <= 0) { // casomiera skoncila
-                    gameOver();
+                    gameState = GAMESTATE.GAME_OVER;
                 }
             }
 
@@ -700,9 +716,6 @@
             // Game Over obrazovka
             function gameOver() {
                 soundPool.playGameOver();
-
-                // gamePage = GAMEPAGE.GAME_OVER;
-                gameState = GAMESTATE.STOPPED;
 
                 // zastav cele diane v leveli
                 stopLevel();
@@ -881,10 +894,10 @@
             // Text Game Over v Game Over obrazovke
             function gameOverText() {
                 buffer.font = buttons.heading.h + "px Gomarice";
-                buffer.fillStyle = '#D95044';
+                buffer.fillStyle = colors.red;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
-                buffer.fillText('Game Over', width/2, 150);
+                buffer.fillText('Game Over', buttons.game_over.gameover.x, buttons.game_over.gameover.y);
 
                 return false;
             }
@@ -892,10 +905,10 @@
             // Text Score v Game Over obrazovke
             function scoreText() {
                 buffer.font = buttons.size + "px Gomarice";
-                buffer.fillStyle = '#39D631';
+                buffer.fillStyle = colors.green;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
-                buffer.fillText('Score: ' + score.points, width/2, 230);
+                buffer.fillText('Score: ' + score.points, buttons.game_over.score.x, buttons.game_over.score.y);
 
                 return false;
             }
