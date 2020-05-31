@@ -424,7 +424,6 @@
                     objects.forEach((obj) => { // pre kazdy objekt
                         luo[obj.id] = obj;
                     });
-                    // console.log(luo);
                     // teraz spustame gameLoop
                     runGame();
                 }).catch((err) => {
@@ -755,8 +754,6 @@
                 soundPool.playShoot();
                 for(var buttonName in buttons.menu) {
                     var button = buttons.menu[buttonName];
-                    // console.log('('+clientX + '  ' +clientY + ') '+button.cx+' '+button.y);
-                    // console.log(buttonName);
                     if(clientX >= button.cx && clientX <= button.cx + button.w && clientY >= button.y && clientY <= button.y + button.h) {
                         switch (buttonName) {
                             case 'start':
@@ -782,9 +779,7 @@
                 soundPool.playShoot();
                 for(var buttonName in buttons.menu.settings.b) {
                     var button = buttons.menu.settings.b[buttonName];
-                    // console.log('('+clientX + '  ' +clientY + ') '+button.cx+' '+button.y);
                     if(clientX >= button.cx && clientX <= button.cx + button.w && clientY >= button.y && clientY <= button.y + button.h) {
-                        // console.log(buttonName);
                         switch (buttonName) {
                             case 'fullscreen':
                                 SETTINGS.FULLSCREEN = !SETTINGS.FULLSCREEN;
