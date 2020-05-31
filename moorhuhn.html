@@ -73,6 +73,7 @@
 
             var PAUSED = false;
 
+            // Tlacitka
             var buttons = {};
 
             function calcButtons() {
@@ -97,7 +98,16 @@
                             cx: width/2 - buttons.size * 4.0 / 2,
                             y: height / 3 * 1.5, // 230
                             h: buttons.size,
-                            w: buttons.size * 4.0
+                            w: buttons.size * 4.0,
+                            b: {
+                                back: {
+                                    h: buttons.size,
+                                    x: width/2,
+                                    cx:width/2 - buttons.size * 3.3 / 2,
+                                    y: height / 3 * 2.5, // 310
+                                    w: buttons.size * 3.7
+                                }
+                            }
                         },
                         settings: {
                             x: width/2,
@@ -132,7 +142,7 @@
                                     h: buttons.size,
                                     x: width/2,
                                     cx:width/2 - buttons.size * 3.3 / 2,
-                                    y: height / 3 * 2.0, // 310
+                                    y: height / 3 * 2.5, // 310
                                     w: buttons.size * 3.7
                                 }
                             }
@@ -140,7 +150,7 @@
                     },
                     game_over: {
                         continue: {
-                            x: width/2 - 96,
+                            x: width/2,
                             cx: width/2 - buttons.size * 5.5 / 2,
                             y: height / 3 * 1.6,
                             h: buttons.size,
@@ -151,6 +161,91 @@
             }
 
             calcButtons();
+
+            // Texty
+            var texts = {};
+
+            function calcTexts() {
+                texts = {
+                    about: {
+                        key_bindings: {
+                            esc: {
+                                x: width * 0.36,
+                                y: height / 4 * 1.0,
+                                h: buttons.size * 0.5,
+                                w: buttons.size * 5.5 // ! not used
+                            },
+                            esc_text:  {
+                                x: width * 0.36,
+                                y: height / 4 * 1.0 + buttons.size * 0.1 / 2,
+                                h: buttons.size * 0.4,
+                                w: buttons.size * 5.5 // ! not used
+                            },
+                            p: {
+                               x: width * 0.36,
+                               y: height / 4 * 1.2,
+                               h: buttons.size * 0.5,
+                               w: buttons.size * 5.5 // ! not used
+                            },
+                            p_text: {
+                              x: width * 0.36,
+                              y: height / 4 * 1.2 + buttons.size * 0.1 / 2,
+                              h: buttons.size * 0.4,
+                              w: buttons.size * 5.5 // ! not used
+                            },
+                            left_click: {
+                               x: width * 0.36,
+                               y: height / 4 * 1.4,
+                               h: buttons.size * 0.5,
+                               w: buttons.size * 5.5 // ! not used
+                            },
+                            left_click_text: {
+                              x: width * 0.36,
+                              y: height / 4 * 1.4 + buttons.size * 0.1 / 2,
+                              h: buttons.size * 0.4,
+                              w: buttons.size * 5.5 // ! not used
+                            },
+                            space: {
+                               x: width * 0.36,
+                               y: height / 4 * 1.6,
+                               h: buttons.size * 0.5,
+                               w: buttons.size * 5.5 // ! not used
+                            },
+                            space_text: {
+                              x: width * 0.36,
+                              y: height / 4 * 1.6 + buttons.size * 0.1 / 2,
+                              h: buttons.size * 0.4,
+                              w: buttons.size * 5.5 // ! not used
+                            },
+                            moorhuhn: {
+                               x: width * 0.7 / 3 * 1, // 1/3
+                               y: height / 4 * 1.6,
+                               h: buttons.size * 0.5,
+                               w: buttons.size * 5.5 // ! not used
+                            },
+                            moorhuhn_shot: {
+                              x: width * 0.7 / 3 * 2, // 2/3
+                              y: height / 4 * 1.6 + buttons.size * 0.1 / 2,
+                              h: buttons.size * 0.4,
+                              w: buttons.size * 5.5 // ! not used
+                            },
+                            magazine: {
+                              x: width * 0.7 / 3 * 3, // 3/3
+                              y: height / 4 * 1.6 + buttons.size * 0.1 / 2,
+                              h: buttons.size * 0.4,
+                              w: buttons.size * 5.5 // ! not used
+                            }
+                        }
+                    }
+                };
+            }
+
+            calcTexts();
+
+            var colors = {
+                color_active: '#FFA936',
+                color_passive: '#FFE336'
+            };
 
             // funkcia na loadnutie obrazka/obrazkov pre jeden objekt
             function loadImage(obj) {
@@ -554,7 +649,7 @@
             // Prvy vstup od uzivatela
             function pressAnyKeyText() {
                 buffer.font = buttons.size * 1.4 + "px Gomarice";
-                buffer.fillStyle = '#FFE336';
+                buffer.fillStyle = colors.color_passive;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
                 buffer.fillText('Press Any Key', width/2, height/2 - buttons.size * 1.4 / 2); // y = 150
@@ -663,6 +758,24 @@
                 }
             }
 
+            // Click v Menu --> About
+            function aboutOnClick(clientX, clientY) {
+                soundPool.playShoot();
+                for(var buttonName in buttons.menu.about.b) {
+                    var button = buttons.menu.about.b[buttonName];
+                    if(clientX >= button.cx && clientX <= button.cx + button.w && clientY >= button.y && clientY <= button.y + button.h) {
+                        switch (buttonName) {
+                            case 'back':
+                                gameState = GAMESTATE.MENU;
+                                break;
+                            default:
+                                break;
+                        }
+                        return false;
+                    }
+                }
+            }
+
             // Zachytenie document elementu - na vyvolanie fullscreenu
             var docEle = document.documentElement;
 
@@ -692,11 +805,6 @@
                 }
             }
 
-            // Click v Menu --> About
-            function aboutOnClick(clientX, clientY) {
-
-            }
-
             // Resetovanie Levelu 1 - Po clicknuti na Continue v Game Over obrazovke
             function resetLevel() {
                 countdown.initTime();
@@ -714,7 +822,7 @@
             // Nadpis - "Moorhuhn Texas"
             function headingText() {
                 buffer.font = buttons.heading.h + "px Gomarice";
-                buffer.fillStyle = '#FFA936';
+                buffer.fillStyle = colors.color_active;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
                 buffer.fillText('Moorhuhn Texas', buttons.heading.x, buttons.heading.y);
@@ -755,10 +863,10 @@
             // Text Continue v Game Over obrazovke
             function continueText() {
                 buffer.font = buttons.size + "px Gomarice";
-                buffer.fillStyle = '#FFE336';
+                buffer.fillStyle = colors.color_passive;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
-                buffer.fillText('Continue', width/2, buttons.game_over.continue.y);
+                buffer.fillText('Continue', buttons.game_over.continue.x, buttons.game_over.continue.y);
 
                 return false;
             }
@@ -779,7 +887,7 @@
 
                 // Buttony
                 buffer.font = buttons.size + "px Gomarice";
-                buffer.fillStyle = '#FFE336';
+                buffer.fillStyle = colors.color_passive;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'center';
 
@@ -788,28 +896,6 @@
                 buffer.fillText('About', buttons.menu.about.x, buttons.menu.about.y); // y 230
 
                 buffer.fillText('Settings', buttons.menu.settings.x, buttons.menu.settings.y);
-            }
-
-            // Stlacenie klavesy pre pauznutie levelu
-            function pauseGame() {
-                gameState = GAMESTATE.PAUSED;
-                PAUSED = true;
-                pauseMoorhuhns();
-            }
-
-            // Pokracovanie v leveli
-            function resumeGame() {
-                gameState = GAMESTATE.RUNNING;
-                PAUSED = false;
-                resumeMoorhuhns();
-            }
-
-            // Vycistenie bufferu a canvasu po vykresleni kazdej iteracie
-            function clear() {
-                buffer.clearRect(0, 0, width, height);
-                context.clearRect(0, 0, width, height);
-
-                return false;
             }
 
             // Click na Menu --> About
@@ -822,7 +908,80 @@
 
                 headingText();
 
+                // Key Bindings
+                // ESC
+                buffer.font = texts.about.key_bindings.esc.h + "px Gomarice";
+                buffer.fillStyle = colors.color_active;
+                buffer.textAlign = 'end';
+                buffer.fillText('ESC', texts.about.key_bindings.esc.x, texts.about.key_bindings.esc.y);
+                // ESC text
+                buffer.font = texts.about.key_bindings.esc_text.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'start';
+                buffer.fillText(' - Exit Fullscreen', texts.about.key_bindings.esc_text.x, texts.about.key_bindings.esc_text.y);
 
+                // P
+                buffer.font = texts.about.key_bindings.p.h + "px Gomarice";
+                buffer.fillStyle = colors.color_active;
+                buffer.textAlign = 'end';
+                buffer.fillText('P', texts.about.key_bindings.p.x, texts.about.key_bindings.p.y);
+                // P text
+                buffer.font = texts.about.key_bindings.p_text.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'start';
+                buffer.fillText(' - Pause / unpause game', texts.about.key_bindings.p_text.x, texts.about.key_bindings.p_text.y);
+
+                // Left Click
+                buffer.font = texts.about.key_bindings.left_click.h + "px Gomarice";
+                buffer.fillStyle = colors.color_active;
+                buffer.textAlign = 'end';
+                buffer.fillText('Left Click', texts.about.key_bindings.left_click.x, texts.about.key_bindings.left_click.y);
+                // Left Click text
+                buffer.font = texts.about.key_bindings.left_click_text.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'start';
+                buffer.fillText(' - Shoot', texts.about.key_bindings.left_click_text.x, texts.about.key_bindings.left_click_text.y);
+
+                // Space
+                buffer.font = texts.about.key_bindings.space.h + "px Gomarice";
+                buffer.fillStyle = colors.color_active;
+                buffer.textAlign = 'end';
+                buffer.fillText('Space', texts.about.key_bindings.space.x, texts.about.key_bindings.space.y);
+                // Space text
+                buffer.font = texts.about.key_bindings.space_text.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'start';
+                buffer.fillText(' - Reload Magazine - Can be reloaded at any time', texts.about.key_bindings.space_text.x, texts.about.key_bindings.space_text.y);
+
+                // Moorhuhn
+                buffer.font = texts.about.key_bindings.moorhuhn.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'center';
+                buffer.fillText('Moorhuhn', texts.about.key_bindings.moorhuhn.x, texts.about.key_bindings.moorhuhn.y);
+                // Moorhuhn image
+
+
+                // Moorhuhn shot
+                buffer.font = texts.about.key_bindings.moorhuhn_shot.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'center';
+                buffer.fillText('Moorhuhn hit', texts.about.key_bindings.moorhuhn_shot.x, texts.about.key_bindings.moorhuhn_shot.y);
+                // Moorhuhn shot image
+
+
+                // Magazine
+                buffer.font = texts.about.key_bindings.magazine.h + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'center';
+                buffer.fillText('Magazine', texts.about.key_bindings.magazine.x, texts.about.key_bindings.magazine.y);
+                // Magazine image
+
+
+                // Back
+                buffer.font = buttons.size + "px Gomarice";
+                buffer.fillStyle = colors.color_passive;
+                buffer.textAlign = 'center';
+                buffer.fillText('Back', buttons.menu.about.b.back.x, buttons.menu.about.b.back.y);
             }
 
             // Click na Menu --> Settings
@@ -837,7 +996,7 @@
 
                 // Buttony
                 buffer.font = buttons.size + "px Gomarice";
-                buffer.fillStyle = '#FFE336';
+                buffer.fillStyle = colors.color_passive;
                 buffer.textBaseline = 'top';
                 buffer.textAlign = 'end';
 
@@ -865,6 +1024,28 @@
                 buffer.fillText('Back', buttons.menu.settings.b.back.x, buttons.menu.settings.b.back.y);
             }
 
+            // Stlacenie klavesy pre pauznutie levelu
+            function pauseGame() {
+                gameState = GAMESTATE.PAUSED;
+                PAUSED = true;
+                pauseMoorhuhns();
+            }
+
+            // Pokracovanie v leveli
+            function resumeGame() {
+                gameState = GAMESTATE.RUNNING;
+                PAUSED = false;
+                resumeMoorhuhns();
+            }
+
+            // Vycistenie bufferu a canvasu po vykresleni kazdej iteracie
+            function clear() {
+                buffer.clearRect(0, 0, width, height);
+                context.clearRect(0, 0, width, height);
+
+                return false;
+            }
+
             function updateCheckboxes() {
                 checkbox_c.setDimensions(buttons.size);
                 checkbox_u.setDimensions(buttons.size);
@@ -879,6 +1060,7 @@
                 gameLoop_i += 1; // pocitame iteracie herneho loopu
                 if(gameLoop_i == 10000) {  // zastavenie loopu na testovanie pocas developmentu
                     // return false; // po returne sa funkcia ukonci, loop sa zastavi
+                    gameLoop_i = 0;
                 }
 
                 // v pripade zmeny rozlisenia, sa zmena detekuje v gameLoope a zmeni sa rozmer canvasu
@@ -903,6 +1085,7 @@
                 if(gameState !== GAMESTATE.RUNNING) {
                     calcButtons(); // vypocitaj dimenzie pre tlacitka
                     updateCheckboxes(); // vypocitaj dimenzie pre checkboxy
+                    calcTexts(); // vypocitaj dimenzie pre texty
                 }
 
                 if(gameState == GAMESTATE.INTRO) {
