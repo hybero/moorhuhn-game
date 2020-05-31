@@ -218,22 +218,41 @@
                               w: buttons.size * 5.5 // ! not used
                             },
                             moorhuhn: {
-                               x: width * 0.5 / 3 * 1 + ((width - width * 0.5) / 2) / 1.5, // 1/3
-                               y: height / 4 * 1.9,
+                               x: width * 0.5 / 3 * 1 + (width - width * 0.5) / 2 / 1.5, // 1/3
+                               y: height / 4 * 2.0,
                                h: buttons.size * 0.5,
-                               w: buttons.size * 5.5 // ! not used
+                               w: buttons.size * 5.5, // ! not used
+                               img: {
+                                   x: width * 0.5 / 3 * 1 + (width - width * 0.5) / 2 / 2, // 1/3
+                                   y: height / 4 * 2.3,
+                                   h: buttons.size * 2,
+                                   w: buttons.size * 2
+                               }
                             },
                             moorhuhn_shot: {
-                              x: width * 0.5 / 3 * 2 + ((width - width * 0.5) / 2) / 1.5, // 2/3
-                              y: height / 4 * 1.9,
+                              x: width * 0.5 / 3 * 2 + (width - width * 0.5) / 2 / 1.5, // 2/3
+                              y: height / 4 * 2.0,
                               h: buttons.size * 0.5,
-                              w: buttons.size * 5.5 // ! not used
+                              w: buttons.size * 5.5, // ! not used
+                              img: {
+                                  x: width * 0.5 / 3 * 2 + (width - width * 0.5) / 2 / 2, // 2/3
+                                  y: height / 4 * 2.3,
+                                  h: buttons.size * 2,
+                                  w: buttons.size * 2
+                              }
                             },
                             magazine: {
-                              x: width * 0.5 / 3 * 3 + ((width - width * 0.5) / 2) / 1.5, // 3/3
-                              y: height / 4 * 1.9,
+                              x: width * 0.5 / 3 * 3 + (width - width * 0.5) / 2 / 1.5, // 3/3
+                              y: height / 4 * 2.0,
                               h: buttons.size * 0.5,
-                              w: buttons.size * 5.5 // ! not used
+                              w: buttons.size * 5.5, // ! not used
+                              img: {
+                                  x: width * 0.5 / 3 * 3 + (width - width * 0.5) / 2 / 1.13, // 3/3
+                                  y: height / 4 * 2.3,
+                                  h: buttons.size * 1.3,
+                                  s: buttons.size * 1.3 * 0.1,
+                                  w: buttons.size * 2 // not used
+                              }
                             }
                         }
                     }
@@ -392,6 +411,7 @@
                     objects.forEach((obj) => { // pre kazdy objekt
                         luo[obj.id] = obj;
                     });
+                    // console.log(luo);
                     // teraz spustame gameLoop
                     runGame();
                 }).catch((err) => {
@@ -512,19 +532,39 @@
             }
 
             // Ammo
-            function drawAmmo() {
+            function drawAmmo(x, y, h, s) {
                 // mame len jeden sprite, pozicie x a y su 0
                 var spriteX = 0;
                 var spriteY = 0;
 
-                // var y = context.canvas.width - 20 - context.canvas.height;
-                var y = context.canvas.height - 20 - ammo.height;
+                var space_right_w = 20;
+                var space_bullet_w = 5;
+
+                if(typeof s !== 'undefined') {
+                    space_bullet_w = s;
+                }
+
+                if(typeof h === 'undefined') {
+                    var w = ammo.width;
+                    var h = ammo.height;
+                } else {
+                    var w = h / ammo.sizeK;
+                }
+
+                if(typeof y === 'undefined') {
+                    var y = context.canvas.height - 20 - ammo.height;
+                }
+
+                var i = 1;
+
+                if(typeof x === 'undefined') {
+                    var x = width - space_right_w;
+                }
 
                 // vykresli kazdy naboj v zasobniku
-                for(var i = 1; i <= ammo.magazine; i++) { // for mozeme robit aj odpocitavanim, co je lepsie pre performance
-                    var x = width - 20 - (i * ammo.width);
-                    if(i > 0) { x += -5 * i; } // 5 // okrem prveho cisla zprava, kazdemu dalsiemu pridaj medzeru // bez medzery to vyzera lepsie
-                    buffer.drawImage(ammo.img, spriteX, spriteY, ammo.spriteWidth, ammo.spriteHeight, x, y, ammo.width, ammo.height);
+                for(i; i <= ammo.magazine; i++) { // for mozeme robit aj odpocitavanim, co je lepsie pre performance
+                    x += -space_bullet_w - w;
+                    buffer.drawImage(ammo.img, spriteX, spriteY, ammo.spriteWidth, ammo.spriteHeight, x, y, w, h);
                 }
             }
 
@@ -959,7 +999,7 @@
                 buffer.textAlign = 'center';
                 buffer.fillText('Moorhuhn', texts.about.key_bindings.moorhuhn.x, texts.about.key_bindings.moorhuhn.y);
                 // Moorhuhn image
-
+                buffer.drawImage(luo.mfr.img, luo.mfr.spriteX, luo.mfr.spriteY, luo.mfr.spriteWidth, luo.mfr.spriteHeight, texts.about.key_bindings.moorhuhn.img.x, texts.about.key_bindings.moorhuhn.img.y, texts.about.key_bindings.moorhuhn.img.w, texts.about.key_bindings.moorhuhn.img.h);
 
                 // Moorhuhn shot
                 buffer.font = texts.about.key_bindings.moorhuhn_shot.h + "px Gomarice";
@@ -967,7 +1007,7 @@
                 buffer.textAlign = 'center';
                 buffer.fillText('Moorhuhn hit', texts.about.key_bindings.moorhuhn_shot.x, texts.about.key_bindings.moorhuhn_shot.y);
                 // Moorhuhn shot image
-
+                buffer.drawImage(luo.mfr.imgDead, luo.mfr.spriteX, luo.mfr.spriteHeight * 2, luo.mfr.spriteWidth, luo.mfr.spriteHeight, texts.about.key_bindings.moorhuhn_shot.img.x, texts.about.key_bindings.moorhuhn_shot.img.y, texts.about.key_bindings.moorhuhn_shot.img.w, texts.about.key_bindings.moorhuhn_shot.img.h);
 
                 // Magazine
                 buffer.font = texts.about.key_bindings.magazine.h + "px Gomarice";
@@ -975,7 +1015,7 @@
                 buffer.textAlign = 'center';
                 buffer.fillText('Magazine', texts.about.key_bindings.magazine.x, texts.about.key_bindings.magazine.y);
                 // Magazine image
-
+                drawAmmo(texts.about.key_bindings.magazine.img.x, texts.about.key_bindings.magazine.img.y, texts.about.key_bindings.magazine.img.h, texts.about.key_bindings.magazine.img.s);
 
                 // Back
                 buffer.font = buttons.size + "px Gomarice";

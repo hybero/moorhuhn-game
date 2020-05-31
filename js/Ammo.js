@@ -5,6 +5,7 @@ const Ammo = function () {
     this.img = null;
     this.imgSrc = './assets/graphics/Ammunition_cropped.png';
     this.width = 18; this.height = 60;
+    this.sizeK = this.height / this.width;
     this.spriteWidth = 253; this.spriteHeight = 746;
     this.magazineMax = 5;
     this.magazine = this.magazineMax;
