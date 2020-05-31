@@ -23,10 +23,10 @@ const MoorhuhnFlying = function (id, d, ccw, cch, imgSrc, imgDeadSrc, img, imgDe
     this.spriteY = 0;
     this.animationRunning = false;
     this.animationSpeedF = 1000; // 1000 | 1025 debug
-    this.animationSpeedMin = 992;
+    this.animationSpeedMin = 994;
     this.animationSpeedMax = 997;
     this.flyingAnimationSpeed = getRandomInt(this.animationSpeedMin, this.animationSpeedMax); // 0-1000 | 900 default
-    this.dyingAnimationSpeed = 995;
+    this.dyingAnimationSpeed = 997;
     this.animationSpeed = this.flyingAnimationSpeed;
     this.animationK = 0;
     this.useAnimation = 'flying'; // flying | dying
@@ -64,10 +64,8 @@ MoorhuhnFlying.prototype = {
         // Tu ideme zmazat moorhuhna ak prejde za okraj
         // vieme z tohto if else urobit len if
         if(this.d == -1 && this.x + this.width <= 0) { // ak ide dolava a pravy okraj prekryje poziciu 0
-            // console.log('[ Mazem moorhuhna ' + this.id + ' ]');
             delete moorhuhns[this.id];
         } else if(this.d == 1 && this.x >= this.ccw) { // ak ide doprava a lavy okraj prekryje poziciu context width
-            // console.log('[ Mazem moorhuhna ' + this.id + ' ]');
             delete moorhuhns[this.id];
         }
 
